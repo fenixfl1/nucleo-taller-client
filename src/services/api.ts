@@ -1,0 +1,101 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import axios, { AxiosError } from 'axios'
+import { BASE_API_PATH } from 'src/constants/routes'
+import { getSessionToken } from 'src/lib/session'
+import { Metadata } from 'src/types/general'
+
+export interface ApiResponse<T> {
+  error?: AxiosError
+  data: {
+    data: T
+    metadata: { pagination: Metadata }
+    message?: string
+  }
+}
+
+export const api = axios.create({
+  baseURL: BASE_API_PATH || 'http://localhost:3010',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
+api.interceptors.request.use((config) => {
+  const token = getSessionToken()
+
+  if (token) {
+    config.headers = {
+      ...(config.headers ?? {}),
+      Authorization: token,
+    } as never
+  }
+
+  return config
+})
+
+export const postRequest = async <T, TData = unknown>(
+  url: string,
+  data: TData
+): Promise<ApiResponse<T>> => {
+  return api.post(url, data)
+}
+
+export const putRequest = async <T, TData = unknown>(
+  url: string,
+  data: TData
+): Promise<ApiResponse<T>> => {
+  return api.put(url, data)
+}
+
+export const getRequest = async <T>(
+  url: string,
+  ...args: any[]
+): Promise<ApiResponse<T>> => {
+  if (args) {
+    url += args.join('/')
+  }
+  return api.get(url)
+}
+
+export const deleteRequest = async <T>(url: string): Promise<ApiResponse<T>> => {
+  return api.delete(url)
+}
+
+type QueryParams = Record<string, string | number | boolean | null | undefined>
+
+export function buildQueryString(
+  baseUrl: string,
+  ...params: (QueryParams | undefined | null)[]
+): string {
+  const query = params
+    .filter(Boolean)
+    .flatMap((obj) =>
+      Object.entries(obj!).flatMap(([key, value]) =>
+        Array.isArray(value) ? value.map((v) => [key, v]) : [[key, value]]
+      )
+    )
+    .filter(([, value]) => value !== undefined && value !== null)
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`
+    )
+    .join('&')
+
+  return query ? `${baseUrl}?${query}` : baseUrl
+}
+
+export function getQueryString(
+  baseUrl: string,
+  params: Record<string, unknown> = {}
+): string {
+  const values: string[] = []
+  Object.entries(params).forEach(([key, value]) => {
+    values.push(
+      `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`
+    )
+  })
+
+  const query = values.join('&')
+
+  return query ? `${baseUrl}?${query}` : baseUrl
+}

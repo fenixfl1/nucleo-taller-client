@@ -1,0 +1,59 @@
+{
+  "token": {
+    "borderRadius": 8,
+    "borderRadiusSM": 8,
+    "borderRadiusLG": 16,
+    "fontSize": 14,
+    "fontSizeLG": 18,
+    "controlHeight": 40,
+    "controlHeightLG": 54,
+    "lineWidth": 1,
+    "colorPrimary": "#20c977",
+    "colorPrimaryHover": "#36d68a",
+    "colorPrimaryBg": "#163f2c",
+    "colorPrimaryBorder": "#2c6d4a",
+    "colorBgBase": "#0e1220",
+    "colorBgLayout": "#101524",
+    "colorBgContainer": "#161c2f",
+    "colorBgElevated": "#1d253b",
+    "colorFillSecondary": "#2a3450",
+    "colorText": "#f2f6ff",
+    "colorTextSecondary": "#b0bcdb",
+    "colorTextTertiary": "#8f9bbd",
+    "colorBorder": "#303b5a",
+    "colorBorderSecondary": "#3a476b",
+    "colorLink": "#7ab9ff",
+    "boxShadow": "0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05)"
+  },
+  "components": {
+    "Menu": {
+      "lineWidth": 0,
+      "fontSize": 14,
+      "itemBg": "#12192d"
+    },
+    "Typography": {
+      "fontSize": 14
+    },
+    "Form": {
+      "itemMarginBottom": 12
+    },
+    "Badge": {
+      "marginXS": 5
+    },
+    "Layout": {
+      "headerBg": "#161c2f",
+      "siderBg": "#12192d"
+    },
+    "Button": {
+      "primaryShadow": null,
+      "defaultShadow": null,
+      "dangerShadow": null
+    },
+    "Tabs": {
+      "horizontalMargin": "0 0 20px 0"
+    },
+    "Collapse": {
+      "contentBg": "#1d1d1d"
+    }
+  }
+}
