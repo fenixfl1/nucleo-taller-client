@@ -91,7 +91,8 @@ const BrandText = styled.p`
   margin: 18px 0 0;
   font-size: clamp(1rem, 1.2vw, 1.32rem);
   line-height: 1.5;
-  color: ${({ theme }) => hexToRgba(theme.colorTextLightSolid || '#ffffff', 0.88)};
+  color: ${({ theme }) =>
+    hexToRgba(theme.colorTextLightSolid || '#ffffff', 0.88)};
 `
 
 const FormPanel = styled.section`
@@ -111,8 +112,8 @@ const FormContent = styled.div`
 `
 
 const Logo = styled.img`
-  width: 64px;
-  height: 64px;
+  width: 120px;
+  height: 120px;
   display: block;
   object-fit: contain;
   margin: 0 auto 10px;
@@ -219,10 +220,14 @@ const Login = () => {
 
         <FormPanel>
           <FormContent>
-            <Logo src={'/assets/logo.png'} alt="Logo NucleoTaller" />
+            <Logo src={'/assets/logo.svg'} alt="Logo Núcleo Taller" />
             <Title>Portal de Taller</Title>
 
-            <CustomForm autoComplete={'off'} form={form} onFinish={handleFinish}>
+            <CustomForm
+              autoComplete={'off'}
+              form={form}
+              onFinish={handleFinish}
+            >
               <CustomFormItem
                 name="username"
                 rules={[{ required: true, message: 'Usuario es requerido.' }]}

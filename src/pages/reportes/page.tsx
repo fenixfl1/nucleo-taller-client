@@ -1,12 +1,10 @@
 import React from 'react'
-import PagePlaceholder from 'src/components/PagePlaceholder'
+import { Navigate } from 'react-router'
+import { buildActivityPath } from 'src/utils/activity-path'
 
 const Page: React.FC = () => {
   return (
-    <PagePlaceholder
-      title='Reportes'
-      description='Reportes operativos del taller e inventario.'
-    />
+    <Navigate replace to={buildActivityPath('0-1-2', '/dashboard/reportes')} />
   )
 }
 

@@ -2,7 +2,7 @@ import React from 'react'
 import { getSessionInfo } from 'src/lib/session'
 import { AppError } from 'src/utils/app-error'
 
-export const layoutMeta = { titleTemplate: 'JW Evalúa · %s' }
+export const layoutMeta = { titleTemplate: 'Radiadores Don Bosco · %s' }
 
 const RootLayout: React.FC<React.PropsWithChildren> = ({ children }) => {
   const { roleId } = getSessionInfo()

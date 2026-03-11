@@ -38,17 +38,27 @@ const ConditionalComponent: React.FC<ConditionalComponentProps> = ({
     }
   }
 
-  const element = condition
-    ? cloneElement(props.children as AnyType, {
+  if (!condition) {
+    if (visible && React.isValidElement(props.children)) {
+      return cloneElement(props.children as AnyType, {
         [trigger]: handleTrigger,
-      })
-    : visible && !condition
-    ? cloneElement(props.children as AnyType, {
-        [trigger]: handleTrigger,
-      })
-    : fallback
+      }) as React.ReactElement
+    }
 
-  return element as React.ReactElement
+    return (fallback ?? null) as React.ReactElement
+  }
+
+  if (visible && React.isValidElement(props.children)) {
+    return cloneElement(props.children as AnyType, {
+      [trigger]: handleTrigger,
+    }) as React.ReactElement
+  }
+
+  if (Array.isArray(props.children) || !React.isValidElement(props.children)) {
+    return <>{props.children}</>
+  }
+
+  return props.children as React.ReactElement
 }
 
 export default ConditionalComponent

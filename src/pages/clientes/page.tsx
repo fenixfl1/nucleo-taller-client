@@ -55,9 +55,13 @@ const CustomerPage: React.FC = () => {
       }
 
       const filter = getConditionFromForm(FILTER)
-      getCustomerPagination({ page, size, condition: [...condition, ...filter] })
+      getCustomerPagination({
+        page,
+        size,
+        condition: [...condition, ...filter],
+      })
     },
-    [debounce, form, getCustomerPagination, metadata, modalState]
+    [debounce, modalState]
   )
 
   useEffect(handleSearch, [handleSearch])

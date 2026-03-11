@@ -36,6 +36,11 @@ const formatNumber = (value: number | null | undefined): string => {
   return Number(value).toFixed(2)
 }
 
+const buildCompatibilityIndicator = (article: Article): string => {
+  const count = Number(article.COMPATIBILITY_COUNT || article.COMPATIBILITIES?.length || 0)
+  return count > 0 ? `${count} compat.` : 'Sin compat.'
+}
+
 const ArticleList: React.FC<ArticleListProps> = ({
   onEdit,
   onUpdate,
@@ -52,6 +57,10 @@ const ArticleList: React.FC<ArticleListProps> = ({
       render: (value) => articleTypeLabels[String(value)] || String(value),
     },
     UNIT_MEASURE: 'Unidad',
+    COMPATIBILITY_COUNT: {
+      header: 'Compatibilidad',
+      render: (_, record) => buildCompatibilityIndicator(record),
+    },
     CURRENT_STOCK: {
       header: 'Stock',
       render: (value) => formatNumber(Number(value)),
@@ -114,6 +123,17 @@ const ArticleList: React.FC<ArticleListProps> = ({
             <CustomText style={{ fontSize: 12 }} disabled={item.STATE === 'I'}>
               {articleTypeLabels[item.ITEM_TYPE] || item.ITEM_TYPE}
             </CustomText>
+            <CustomTag
+              color={
+                Number(item.COMPATIBILITY_COUNT || item.COMPATIBILITIES?.length || 0) > 0
+                  ? 'processing'
+                  : 'default'
+              }
+            >
+              <CustomText style={{ fontSize: 12 }}>
+                {buildCompatibilityIndicator(item)}
+              </CustomText>
+            </CustomTag>
             <CustomText style={{ fontSize: 12 }} disabled={item.STATE === 'I'}>
               Stock: {formatNumber(item.CURRENT_STOCK)}
             </CustomText>

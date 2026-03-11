@@ -31,23 +31,33 @@ const Header = styled(CustomHeader)<{
   display: flex;
   align-items: center;
   height: 64px;
-  width: ${({ collapsed }) =>
-    collapsed ? 'calc(100vw - 120px)' : 'calc(100vw - 240px)'};
+  width: auto;
+  min-width: 0;
+  flex: 1;
   border-radius: 8px !important;
-  margin: 21px 24px 0 20px;
-  padding: 0 35px 0 0 !important;
+  margin: 21px 24px 0 24px;
+  padding: 0 24px !important;
 `
 
 const UserInfo = styled.div`
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 10px;
   height: 100%;
+  min-width: 0;
 `
 
 const UserName = styled(CustomText)`
   color: ${({ theme }) => theme.colorTextLightSolid || '#ffffff'};
   line-height: 1;
+  white-space: nowrap;
+`
+
+const HeaderTitle = styled(CustomTitle)`
+  margin: 0 !important;
+  color: white !important;
+  line-height: 1.2 !important;
 `
 
 interface MainHeaderProps {
@@ -89,6 +99,7 @@ const MainHeader: React.FC<MainHeaderProps> = ({ showLogout = false }) => {
           width={'100%'}
           height={'100%'}
           align={'middle'}
+          wrap={false}
         >
           <ConditionalComponent
             condition={!showLogout}
@@ -103,8 +114,12 @@ const MainHeader: React.FC<MainHeaderProps> = ({ showLogout = false }) => {
               </CustomTooltip>
             }
           >
-            <CustomCol xs={12}>
-              <CustomSpace direction={'horizontal'}>
+            <CustomCol flex={'auto'} style={{ minWidth: 0 }}>
+              <CustomSpace
+                direction={'horizontal'}
+                width={'auto'}
+                style={{ alignItems: 'center', minWidth: 0 }}
+              >
                 <CustomButton
                   type="text"
                   icon={
@@ -117,12 +132,12 @@ const MainHeader: React.FC<MainHeaderProps> = ({ showLogout = false }) => {
                     height: 64,
                   }}
                 />
-                <CustomTitle
+                <HeaderTitle
                   level={3}
-                  style={{ margin: 'auto', color: 'white' }}
+                  ellipsis={{ tooltip: currenMenuOption?.DESCRIPTION || 'Panel' }}
                 >
                   {currenMenuOption?.DESCRIPTION}
-                </CustomTitle>
+                </HeaderTitle>
               </CustomSpace>
             </CustomCol>
           </ConditionalComponent>

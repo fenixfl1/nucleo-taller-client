@@ -57,7 +57,7 @@ const VehiclePage: React.FC = () => {
       const filter = getConditionFromForm(FILTER)
       getVehiclePagination({ page, size, condition: [...condition, ...filter] })
     },
-    [debounce, form, getVehiclePagination, metadata, modalState]
+    [debounce, modalState]
   )
 
   useEffect(handleSearch, [handleSearch])

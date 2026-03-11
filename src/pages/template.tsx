@@ -32,8 +32,12 @@ const LogoContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  overflow: hidden;
   img {
     width: 65%;
+    max-width: 150px;
+    transition: width 0.2s ease, max-width 0.2s ease;
   }
 `
 
@@ -48,6 +52,8 @@ const Content = styled(CustomContent)`
 `
 
 const BodyContainer = styled.div`
+  flex: 1;
+  min-width: 0;
   height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
@@ -57,6 +63,7 @@ const BodyContainer = styled.div`
 const Sider = styled(CustomSider)`
   height: 100vh !important;
   box-shadow: ${({ theme }) => theme.boxShadow} !important;
+  overflow: hidden;
 
   .ant-layout-sider-children {
     height: 100%;
@@ -67,10 +74,86 @@ const Sider = styled(CustomSider)`
     padding: 10px;
     overflow: hidden;
   }
+
+  &.ant-layout-sider-collapsed {
+    .ant-layout-sider-children {
+      padding: 10px 8px;
+    }
+
+    ${LogoContainer} img {
+      width: 36px;
+      max-width: 36px;
+    }
+  }
 `
 
 const Menu = styled(CustomMenu)`
   border-right: 0;
+  background: transparent !important;
+
+  .ant-menu-item-icon,
+  .ant-menu-submenu-title .ant-menu-item-icon,
+  .ant-menu-submenu-title > .ant-menu-item-icon {
+    min-width: 20px;
+    margin-inline-end: 12px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  &.ant-menu-inline-collapsed {
+    width: 100% !important;
+  }
+
+  .ant-menu-item,
+  .ant-menu-submenu-title {
+    margin-inline: 0 !important;
+    width: 100% !important;
+  }
+
+  &.ant-menu-inline-collapsed > .ant-menu-item,
+  &.ant-menu-inline-collapsed > .ant-menu-submenu > .ant-menu-submenu-title {
+    padding-inline: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px !important;
+    height: 48px !important;
+    margin: 0 auto 12px !important;
+    border-radius: 16px;
+  }
+
+  &.ant-menu-inline-collapsed
+      > .ant-menu-item
+      .ant-menu-title-content,
+  &.ant-menu-inline-collapsed
+      > .ant-menu-submenu
+      > .ant-menu-submenu-title
+      .ant-menu-title-content,
+  &.ant-menu-inline-collapsed
+      > .ant-menu-submenu
+      > .ant-menu-submenu-title
+      .ant-menu-submenu-arrow {
+    display: none !important;
+    width: 0 !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+  }
+
+  &.ant-menu-inline-collapsed > .ant-menu-item .ant-menu-item-icon,
+  &.ant-menu-inline-collapsed
+      > .ant-menu-submenu
+      > .ant-menu-submenu-title
+      .ant-menu-item-icon,
+  &.ant-menu-inline-collapsed
+      > .ant-menu-submenu
+      > .ant-menu-submenu-title
+      > .ant-menu-item-icon {
+    margin-inline-end: 0 !important;
+    min-width: 24px;
+    font-size: 0;
+  }
 `
 
 const MenuScrollContainer = styled.div`
@@ -87,10 +170,17 @@ const LogoutContainer = styled.div`
   margin-top: auto;
   padding: 10px 0 4px;
   flex-shrink: 0;
+  display: flex;
+  justify-content: center;
 `
 
 const Layout = styled(CustomLayout)`
   height: 100vh !important;
+`
+
+const LogoRow = styled(CustomRow)<{ $collapsed: boolean }>`
+  height: 100px;
+  padding-inline: ${({ $collapsed }) => ($collapsed ? '0' : '8px')};
 `
 
 const findOptionByPath = (
@@ -216,18 +306,14 @@ const RootTemplate: React.FC<React.PropsWithChildren> = ({ children }) => {
         key: option?.MENU_OPTION_ID,
         title: option.NAME,
         type: option.TYPE,
-        icon: <SVGReader svg={option.ICON} />,
+        icon: <SVGReader svg={option.ICON} size={collapsed ? 22 : 20} />,
         onClick: option.CHILDREN?.length
           ? undefined
           : () => handleClickOption(option),
         children: option?.CHILDREN?.length
           ? getSubMenu(option.CHILDREN)
           : undefined,
-        label: (
-          <CustomTooltip placement={'right'} title={option.NAME}>
-            <div style={{ width: '100%', display: 'block' }}>{option.NAME}</div>
-          </CustomTooltip>
-        ),
+        label: option.NAME,
       }
     }) as never
   }
@@ -286,34 +372,44 @@ const RootTemplate: React.FC<React.PropsWithChildren> = ({ children }) => {
       <ConditionalComponent condition={isAuthenticated} fallback={children}>
         <ThemeTransitionLayout>
           <Layout hasSider>
-            <Sider width={240} trigger={null} collapsible collapsed={collapsed}>
-              <CustomRow justify={'center'} style={{ height: '100px' }}>
+            <Sider
+              width={240}
+              collapsedWidth={80}
+              trigger={null}
+              collapsible
+              collapsed={collapsed}
+            >
+              <LogoRow justify={'center'} $collapsed={collapsed}>
                 <LogoContainer>
-                  <img src={'/assets/logo.png'} />
+                  <img src={'/assets/logo.svg'} />
                 </LogoContainer>
-              </CustomRow>
+              </LogoRow>
               <CustomDivider />
               <MenuScrollContainer>
                 <Menu
                   mode={'inline'}
-                  openKeys={openKeys}
+                  inlineCollapsed={collapsed}
+                  openKeys={collapsed ? [] : openKeys}
                   selectedKeys={selectedKeys}
                   items={items}
-                  onOpenChange={handleOpenChange}
+                  onOpenChange={collapsed ? undefined : handleOpenChange}
                 />
               </MenuScrollContainer>
 
               <LogoutContainer>
-                <CustomButton
-                  size={'large'}
-                  className={'btn-logout'}
-                  type={'text'}
-                  onClick={handleRemoveSession}
-                  icon={<LogoutOutlined />}
-                  block={!collapsed}
-                >
-                  {!collapsed && 'Cerrar Sesión'}
-                </CustomButton>
+                <CustomTooltip placement={'right'} title={'Cerrar Sesión'}>
+                  <CustomButton
+                    size={'large'}
+                    className={'btn-logout'}
+                    type={'text'}
+                    onClick={handleRemoveSession}
+                    icon={<LogoutOutlined />}
+                    block={!collapsed}
+                    style={collapsed ? { width: 48, minWidth: 48 } : undefined}
+                  >
+                    {!collapsed && 'Cerrar Sesión'}
+                  </CustomButton>
+                </CustomTooltip>
               </LogoutContainer>
             </Sider>
             <BodyContainer>

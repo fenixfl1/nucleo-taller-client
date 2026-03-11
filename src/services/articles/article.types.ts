@@ -1,5 +1,15 @@
 export type ArticleType = 'RADIADOR' | 'REPUESTO' | 'MATERIAL' | 'INSUMO' | 'OTRO'
 
+export interface ArticleCompatibility {
+  ARTICLE_COMPATIBILITY_ID?: number
+  BRAND: string
+  MODEL: string
+  YEAR_FROM?: number | null
+  YEAR_TO?: number | null
+  ENGINE?: string
+  NOTES?: string
+}
+
 export interface Article {
   ARTICLE_ID: number
   CODE: string
@@ -12,6 +22,8 @@ export interface Article {
   CURRENT_STOCK: number
   COST_REFERENCE: number | null
   DESCRIPTION: string
+  COMPATIBILITY_COUNT: number
+  COMPATIBILITIES?: ArticleCompatibility[]
   STATE: string
   CREATED_AT?: string
 }

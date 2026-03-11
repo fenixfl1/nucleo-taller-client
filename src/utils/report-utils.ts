@@ -21,6 +21,7 @@ import { Business } from 'src/services/users/users.types'
 import { getBusinessInfo, getSessionInfo } from 'src/lib/session'
 import formatter from './formatter'
 import { isValidDate } from './date-utils'
+import { addPdfBusinessLogo } from './pdf-logo'
 
 type AnyRecord = Record<string, unknown>
 
@@ -585,12 +586,18 @@ export async function exportToPDF<T = any>({
 
   const pageWidth = doc.internal.pageSize.getWidth()
   const pageHeight = doc.internal.pageSize.getHeight()
+  const hasLogo = await addPdfBusinessLogo(
+    doc,
+    info?.LOGO || info?.LOGO_URL,
+    { x: 10, y: 10, width: 24, height: 24 }
+  )
+  const headerCenterX = pageWidth / 2
 
   doc.setFontSize(18)
-  doc.text(title, pageWidth / 2, 20, { align: 'center' })
+  doc.text(title, headerCenterX, hasLogo ? 18 : 20, { align: 'center' })
 
   doc.setFontSize(10)
-  let y = 30
+  let y = hasLogo ? 38 : 30
   const addLine = (text?: string) => {
     if (!text) return
     doc.text(text, 10, y)
@@ -620,9 +627,10 @@ export async function exportToPDF<T = any>({
 
   doc.setDrawColor(0)
   doc.setLineWidth(0.2)
-  doc.line(10, 50, pageWidth - 10, 50)
+  const dividerY = Math.max(y + 2, hasLogo ? 48 : 50)
+  doc.line(10, dividerY, pageWidth - 10, dividerY)
 
-  let tableStartY = 55
+  let tableStartY = dividerY + 5
 
   if (extraHeaderHtml) {
     if (isBrowser) {
