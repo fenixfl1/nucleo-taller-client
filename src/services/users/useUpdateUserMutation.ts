@@ -7,6 +7,7 @@ interface UpdateUserPayload {
   USER_ID: number
   USERNAME?: string
   ROLE_ID?: number
+  EMPLOYEE_TYPE?: 'OPERACIONAL' | 'ADMINISTRATIVO'
   NAME?: string
   LAST_NAME?: string
   IDENTITY_DOCUMENT?: string

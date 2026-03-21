@@ -5,7 +5,7 @@ const Page: React.FC = () => {
   return (
     <PagePlaceholder
       title='Configuracion'
-      description='Parametros generales y catalogos del sistema.'
+      description='Parametros generales y servicios del sistema.'
     />
   )
 }

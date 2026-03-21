@@ -33,6 +33,30 @@ const statusColorByCode: Record<string, string> = {
 const formatDate = (value?: string | null) =>
   value ? dayjs(value).format('DD/MM/YYYY HH:mm') : 'N/A'
 
+const getPromiseTag = (item: WorkOrder) => {
+  if (!item.PROMISED_AT) return null
+  if (item.STATUS_CODE === 'ENTREGADA' || item.STATUS_CODE === 'CANCELADA') {
+    return null
+  }
+
+  const promiseDate = dayjs(item.PROMISED_AT)
+  const overdueLimit = dayjs().subtract(1, 'day').endOf('day')
+
+  if (promiseDate.isBefore(overdueLimit)) {
+    return { color: 'error', label: 'Vencida' }
+  }
+
+  if (promiseDate.isBefore(dayjs().endOf('day'))) {
+    return { color: 'warning', label: 'Compromiso hoy' }
+  }
+
+  if (promiseDate.isBefore(dayjs().add(2, 'day').endOf('day'))) {
+    return { color: 'processing', label: 'Proxima 48h' }
+  }
+
+  return { color: 'default', label: 'Programada' }
+}
+
 const WorkOrderList: React.FC<WorkOrderListProps> = ({
   onChange,
   onEdit,
@@ -62,6 +86,7 @@ const WorkOrderList: React.FC<WorkOrderListProps> = ({
   const renderItem: ListProps<WorkOrder>['renderItem'] = (item) => {
     const isFinalStatus =
       item.STATUS_CODE === 'ENTREGADA' || item.STATUS_CODE === 'CANCELADA'
+    const promiseTag = getPromiseTag(item)
 
     return (
       <CustomListItem
@@ -95,12 +120,25 @@ const WorkOrderList: React.FC<WorkOrderListProps> = ({
               split={<CustomDivider type={'vertical'} />}
             >
               <CustomText style={{ fontSize: 12 }}>{item.VEHICLE_LABEL}</CustomText>
+              {item.TECHNICIAN_NAMES ? (
+                <CustomText style={{ fontSize: 12 }}>
+                  Técnico(s): {item.TECHNICIAN_NAMES}
+                </CustomText>
+              ) : null}
               <CustomText style={{ fontSize: 12 }}>
                 Apertura: {formatDate(item.OPENED_AT)}
+              </CustomText>
+              <CustomText style={{ fontSize: 12 }}>
+                Promesa: {formatDate(item.PROMISED_AT)}
               </CustomText>
               <CustomTag color={statusColorByCode[item.STATUS_CODE] || 'default'}>
                 <CustomText style={{ fontSize: 12 }}>{item.STATUS_NAME}</CustomText>
               </CustomTag>
+              {promiseTag ? (
+                <CustomTag color={promiseTag.color}>
+                  <CustomText style={{ fontSize: 12 }}>{promiseTag.label}</CustomText>
+                </CustomTag>
+              ) : null}
             </CustomSpace>
           }
         />

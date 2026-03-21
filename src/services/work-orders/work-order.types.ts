@@ -73,6 +73,7 @@ export interface WorkOrder {
   INTERNAL_NOTES: string
   CUSTOMER_OBSERVATIONS: string
   REQUIRES_DISASSEMBLY: boolean
+  TECHNICIAN_NAMES?: string
   STATE: string
   SERVICE_LINES?: WorkOrderServiceLine[]
   CONSUMED_ITEMS?: WorkOrderConsumedItem[]

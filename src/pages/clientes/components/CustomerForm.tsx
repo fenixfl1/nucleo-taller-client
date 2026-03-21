@@ -55,6 +55,7 @@ interface CustomerFormProps {
   customer?: Customer
   onClose?: () => void
   onSuccess?: () => void
+  onSaved?: (customer: Customer) => void
 }
 
 const contactTypeOptions = [
@@ -246,6 +247,7 @@ const CustomerForm: React.FC<CustomerFormProps> = ({
   customer,
   onClose,
   onSuccess,
+  onSaved,
 }) => {
   const notification = useAppNotification()
   const [errorHandler] = useErrorHandler()
@@ -304,21 +306,23 @@ const CustomerForm: React.FC<CustomerFormProps> = ({
       }
 
       let description = 'Cliente registrado exitosamente.'
+      let savedCustomer: Customer
 
       if (customer?.PERSON_ID) {
-        await updateCustomer({
+        savedCustomer = await updateCustomer({
           ...payload,
           CUSTOMER_ID: customer.PERSON_ID,
         })
         description = 'Cliente actualizado exitosamente.'
       } else {
-        await createCustomer(payload)
+        savedCustomer = await createCustomer(payload)
       }
 
       notification({
         message: 'Operación exitosa',
         description,
       })
+      onSaved?.(savedCustomer)
       onSuccess?.()
       handleCancel()
     } catch (error) {

@@ -45,6 +45,7 @@ import {
   WorkOrderTechnician,
 } from 'src/services/work-orders/work-order.types'
 import { useGetWorkOrderServiceTypeListQuery } from 'src/services/work-order-service-types/useGetWorkOrderServiceTypeListQuery'
+import { WorkOrderServiceType as ServiceCatalogItem } from 'src/services/work-order-service-types/work-order-service-type.types'
 import { User } from 'src/services/users/users.types'
 import { useGetUserPaginationMutation } from 'src/services/users/useGetUserPaginationMutation'
 import { useGetVehiclePaginationMutation } from 'src/services/vehicles/useGetVehiclePaginationMutation'
@@ -54,6 +55,8 @@ import { useCustomerStore } from 'src/store/customer.store'
 import { useUserStore } from 'src/store/user.store'
 import { useVehicleStore } from 'src/store/vehicle.store'
 import { AdvancedCondition } from 'src/types/general'
+import CustomerForm from 'src/pages/clientes/components/CustomerForm'
+import VehicleForm from 'src/pages/vehiculos/components/VehicleForm'
 
 type WorkOrderFormValues = {
   CUSTOMER_ID: number
@@ -91,12 +94,7 @@ const buildCompatibilityLabel = (article: Article): string => {
       ? `${compatibility.YEAR_FROM || ''}${compatibility.YEAR_TO ? `-${compatibility.YEAR_TO}` : ''}`
       : ''
 
-  return [
-    compatibility.BRAND,
-    compatibility.MODEL,
-    years,
-    compatibility.ENGINE,
-  ]
+  return [compatibility.BRAND, compatibility.MODEL, years, compatibility.ENGINE]
     .filter(Boolean)
     .join(' ')
 }
@@ -122,6 +120,8 @@ const buildArticleOptionLabel = ({
     .join(' · ')
 }
 
+const formatAmount = (value: number) => Number(value || 0).toFixed(2)
+
 const statusTimelineColorByCode: Record<string, string> = {
   CREADA: '#9ca3af',
   DIAGNOSTICO: '#1677ff',
@@ -135,11 +135,27 @@ const ServiceLineCollapseItem: React.FC<{
   field: FormListFieldData
   form: FormInstance<WorkOrderFormValues>
   serviceTypeOptions: Array<{ label: string; value: string }>
-}> = ({ field, form, serviceTypeOptions }) => {
+  serviceTypeMap: Map<string, ServiceCatalogItem>
+}> = ({ field, form, serviceTypeOptions, serviceTypeMap }) => {
   const currentType = Form.useWatch(
     ['SERVICE_LINES', field.name, 'SERVICE_TYPE'],
     form
   ) as string | undefined
+  const currentQuantity = Number(
+    Form.useWatch(['SERVICE_LINES', field.name, 'QUANTITY'], form) || 0
+  )
+  const currentReferenceAmount = Number(
+    Form.useWatch(['SERVICE_LINES', field.name, 'REFERENCE_AMOUNT'], form) || 0
+  )
+  const currentDescription = `${
+    Form.useWatch(['SERVICE_LINES', field.name, 'DESCRIPTION'], form) || ''
+  }`
+  const selectedServiceType = currentType
+    ? serviceTypeMap.get(currentType)
+    : undefined
+  const lineTotal = Number(
+    (currentQuantity * currentReferenceAmount).toFixed(2)
+  )
 
   const resolvedOptions = currentType
     ? serviceTypeOptions.some((item) => item.value === currentType)
@@ -147,8 +163,69 @@ const ServiceLineCollapseItem: React.FC<{
       : [...serviceTypeOptions, { label: currentType, value: currentType }]
     : serviceTypeOptions
 
+  const handleServiceTypeChange = (value?: string) => {
+    const nextType = `${value || ''}`.trim()
+    if (!nextType) return
+
+    const serviceType = serviceTypeMap.get(nextType)
+    if (!serviceType) return
+
+    const descriptionPath: ['SERVICE_LINES', number, 'DESCRIPTION'] = [
+      'SERVICE_LINES',
+      field.name,
+      'DESCRIPTION',
+    ]
+    const amountPath: ['SERVICE_LINES', number, 'REFERENCE_AMOUNT'] = [
+      'SERVICE_LINES',
+      field.name,
+      'REFERENCE_AMOUNT',
+    ]
+
+    if (!currentDescription.trim() && serviceType.DESCRIPTION) {
+      form.setFieldValue(descriptionPath, serviceType.DESCRIPTION)
+    }
+
+    const currentAmount = form.getFieldValue(amountPath)
+    if (
+      currentAmount === null ||
+      currentAmount === undefined ||
+      currentAmount === '' ||
+      Number(currentAmount) <= 0
+    ) {
+      form.setFieldValue(amountPath, Number(serviceType.BASE_PRICE || 0))
+    }
+  }
+
   return (
     <CustomRow justify={'start'} width={'100%'}>
+      {selectedServiceType ? (
+        <CustomCol xs={24}>
+          <div
+            style={{
+              marginBottom: 12,
+              padding: '10px 12px',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 12,
+            }}
+          >
+            <CustomTag color={'processing'}>
+              Precio base:{' '}
+              {formatAmount(Number(selectedServiceType.BASE_PRICE || 0))}
+            </CustomTag>
+            <CustomTag color={'gold'}>
+              Total: {formatAmount(lineTotal)}
+            </CustomTag>
+            {selectedServiceType.DESCRIPTION ? (
+              <div style={{ marginTop: 6 }}>
+                <CustomText style={{ fontSize: 12 }}>
+                  {selectedServiceType.DESCRIPTION}
+                </CustomText>
+              </div>
+            ) : null}
+          </div>
+        </CustomCol>
+      ) : null}
+
       <CustomCol {...defaultBreakpoints}>
         <CustomFormItem
           label={'Tipo'}
@@ -156,59 +233,60 @@ const ServiceLineCollapseItem: React.FC<{
           rules={[{ required: true, message: 'Digite el tipo de servicio.' }]}
         >
           <CustomSelect
-            placeholder={'Seleccionar tipo de servicio'}
+            placeholder={'Seleccionar servicio'}
+            onChange={handleServiceTypeChange}
             options={resolvedOptions}
           />
         </CustomFormItem>
       </CustomCol>
 
-    <CustomCol {...defaultBreakpoints}>
-      <CustomFormItem
-        label={'Cantidad'}
-        name={[field.name, 'QUANTITY']}
-        rules={[{ required: true, message: 'Digite la cantidad.' }]}
-      >
-        <CustomInputNumber
-          style={{ width: '100%' }}
-          min={0.01}
-          precision={2}
-          step={0.01}
-          placeholder={'0.00'}
-        />
-      </CustomFormItem>
-    </CustomCol>
+      <CustomCol {...defaultBreakpoints}>
+        <CustomFormItem
+          label={'Cantidad'}
+          name={[field.name, 'QUANTITY']}
+          rules={[{ required: true, message: 'Digite la cantidad.' }]}
+        >
+          <CustomInputNumber
+            style={{ width: '100%' }}
+            min={0.01}
+            precision={2}
+            step={0.01}
+            placeholder={'0.00'}
+          />
+        </CustomFormItem>
+      </CustomCol>
 
-    <CustomCol xs={24}>
-      <CustomFormItem
-        label={'Descripción'}
-        name={[field.name, 'DESCRIPTION']}
-        rules={[{ required: true, message: 'Digite la descripción.' }]}
-        {...labelColFullWidth}
-      >
-        <CustomTextArea placeholder={'Trabajo realizado'} />
-      </CustomFormItem>
-    </CustomCol>
+      <CustomCol xs={24}>
+        <CustomFormItem
+          label={'Descripción'}
+          name={[field.name, 'DESCRIPTION']}
+          rules={[{ required: true, message: 'Digite la descripción.' }]}
+          {...labelColFullWidth}
+        >
+          <CustomTextArea placeholder={'Trabajo realizado'} />
+        </CustomFormItem>
+      </CustomCol>
 
-    <CustomCol {...defaultBreakpoints}>
-      <CustomFormItem
-        label={'Monto Ref.'}
-        name={[field.name, 'REFERENCE_AMOUNT']}
-      >
-        <CustomInputNumber
-          style={{ width: '100%' }}
-          min={0}
-          precision={2}
-          step={0.01}
-          placeholder={'0.00'}
-        />
-      </CustomFormItem>
-    </CustomCol>
+      <CustomCol {...defaultBreakpoints}>
+        <CustomFormItem
+          label={'Precio Ref.'}
+          name={[field.name, 'REFERENCE_AMOUNT']}
+        >
+          <CustomInputNumber
+            style={{ width: '100%' }}
+            min={0}
+            precision={2}
+            step={0.01}
+            placeholder={'0.00'}
+          />
+        </CustomFormItem>
+      </CustomCol>
 
-    <CustomCol {...defaultBreakpoints}>
-      <CustomFormItem label={'Notas'} name={[field.name, 'NOTES']}>
-        <CustomInput placeholder={'Notas internas'} />
-      </CustomFormItem>
-    </CustomCol>
+      <CustomCol {...defaultBreakpoints}>
+        <CustomFormItem label={'Notas'} name={[field.name, 'NOTES']}>
+          <CustomInput placeholder={'Notas internas'} />
+        </CustomFormItem>
+      </CustomCol>
     </CustomRow>
   )
 }
@@ -280,7 +358,9 @@ const ConsumedItemCollapseItem: React.FC<{
     }
 
     if (
-      (currentCost === null || currentCost === undefined || currentCost === '') &&
+      (currentCost === null ||
+        currentCost === undefined ||
+        currentCost === '') &&
       article.COST_REFERENCE !== null &&
       article.COST_REFERENCE !== undefined
     ) {
@@ -296,9 +376,7 @@ const ConsumedItemCollapseItem: React.FC<{
         border: isIncompatible
           ? '1px solid rgba(255, 77, 79, 0.35)'
           : '1px solid rgba(255,255,255,0.06)',
-        background: isIncompatible
-          ? 'rgba(255, 77, 79, 0.06)'
-          : 'transparent',
+        background: isIncompatible ? 'rgba(255, 77, 79, 0.06)' : 'transparent',
       }}
     >
       {selectedArticleId ? (
@@ -326,6 +404,7 @@ const ConsumedItemCollapseItem: React.FC<{
       <CustomRow justify={'start'} width={'100%'}>
         <CustomCol xs={24}>
           <CustomFormItem
+            {...labelColFullWidth}
             label={'Artículo'}
             name={[field.name, 'ARTICLE_ID']}
             rules={[
@@ -526,11 +605,18 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
   const [searchVehicleKey, setSearchVehicleKey] = useState('')
   const [searchArticleKey, setSearchArticleKey] = useState('')
   const [searchTechnicianKey, setSearchTechnicianKey] = useState('')
+  const [quickCustomerOpen, setQuickCustomerOpen] = useState(false)
+  const [quickVehicleOpen, setQuickVehicleOpen] = useState(false)
+  const [recentCustomer, setRecentCustomer] = useState<Customer>()
+  const [recentVehicle, setRecentVehicle] = useState<Vehicle>()
 
   const watchedCustomerId = Form.useWatch('CUSTOMER_ID', form)
   const watchedVehicleId = Form.useWatch('VEHICLE_ID', form)
   const watchedConsumedItems = Form.useWatch('CONSUMED_ITEMS', form) as
     | WorkOrderConsumedItem[]
+    | undefined
+  const watchedServiceLines = Form.useWatch('SERVICE_LINES', form) as
+    | WorkOrderServiceLine[]
     | undefined
 
   const debounceCustomer = useDebounce(searchCustomerKey)
@@ -572,29 +658,68 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
     isFetching: isGetOneFetching,
   } = useGetOneWorkOrderQuery(workOrderId, Boolean(open && workOrderId))
 
+  const availableCustomers = useMemo(() => {
+    const mergedCustomers = new Map<number, Customer>()
+
+    customerList.forEach((customer) => {
+      mergedCustomers.set(customer.PERSON_ID, customer)
+    })
+
+    if (recentCustomer?.PERSON_ID) {
+      mergedCustomers.set(recentCustomer.PERSON_ID, recentCustomer)
+    }
+
+    return [...mergedCustomers.values()]
+  }, [customerList, recentCustomer])
+
   const customerOptions = useMemo(
     () =>
-      customerList.map((customer) => ({
+      availableCustomers.map((customer) => ({
         value: customer.PERSON_ID,
-        label: `${customer.NAME} ${customer.LAST_NAME || ''} (${customer.IDENTITY_DOCUMENT || 'SIN DOC'})`.trim(),
+        label:
+          `${customer.NAME} ${customer.LAST_NAME || ''} (${customer.IDENTITY_DOCUMENT || 'SIN DOC'})`.trim(),
       })),
-    [customerList]
+    [availableCustomers]
   )
+
+  const availableVehicles = useMemo(() => {
+    if (!watchedCustomerId) {
+      return []
+    }
+
+    const mergedVehicles = new Map<number, Vehicle>()
+
+    vehicleList.forEach((vehicle) => {
+      if (Number(vehicle.CUSTOMER_ID) === Number(watchedCustomerId)) {
+        mergedVehicles.set(vehicle.VEHICLE_ID, vehicle)
+      }
+    })
+
+    if (
+      recentVehicle?.VEHICLE_ID &&
+      Number(recentVehicle.CUSTOMER_ID) === Number(watchedCustomerId)
+    ) {
+      mergedVehicles.set(recentVehicle.VEHICLE_ID, recentVehicle)
+    }
+
+    return [...mergedVehicles.values()]
+  }, [recentVehicle, vehicleList, watchedCustomerId])
 
   const vehicleOptions = useMemo(
     () =>
-      (watchedCustomerId ? vehicleList : []).map((vehicle) => ({
+      availableVehicles.map((vehicle) => ({
         value: vehicle.VEHICLE_ID,
         label: `${vehicle.PLATE || 'SIN PLACA'} - ${vehicle.BRAND} ${vehicle.MODEL}`,
       })),
-    [vehicleList, watchedCustomerId]
+    [availableVehicles]
   )
 
   const technicianOptions = useMemo(
     () =>
       userList.map((user) => ({
         value: user.STAFF_ID,
-        label: `${user.NAME} ${user.LAST_NAME || ''} (@${user.USERNAME})`.trim(),
+        label:
+          `${user.NAME} ${user.LAST_NAME || ''} (@${user.USERNAME})`.trim(),
       })),
     [userList]
   )
@@ -603,9 +728,29 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
     () =>
       serviceTypeList.map((item) => ({
         value: item.NAME,
-        label: item.NAME,
+        label: `${item.NAME} · Base ${formatAmount(Number(item.BASE_PRICE || 0))}`,
       })),
     [serviceTypeList]
+  )
+
+  const serviceTypeMap = useMemo(
+    () => new Map(serviceTypeList.map((item) => [item.NAME, item])),
+    [serviceTypeList]
+  )
+
+  const serviceLinesTotal = useMemo(
+    () =>
+      Number(
+        (
+          (watchedServiceLines || []).reduce((accumulator, item) => {
+            return (
+              accumulator +
+              Number(item?.QUANTITY || 0) * Number(item?.REFERENCE_AMOUNT || 0)
+            )
+          }, 0) || 0
+        ).toFixed(2)
+      ),
+    [watchedServiceLines]
   )
 
   const defaultStatusId = useMemo(
@@ -616,7 +761,9 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
   )
 
   const statusOptions = useMemo(() => {
-    const filtered = workOrderId ? statusList : statusList.filter((item) => !item.IS_FINAL)
+    const filtered = workOrderId
+      ? statusList
+      : statusList.filter((item) => !item.IS_FINAL)
 
     return filtered.map((status: WorkOrderStatus) => ({
       value: status.STATUS_ID,
@@ -639,7 +786,9 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
           return rightStock - leftStock
         }
 
-        return `${left.CODE} ${left.NAME}`.localeCompare(`${right.CODE} ${right.NAME}`)
+        return `${left.CODE} ${left.NAME}`.localeCompare(
+          `${right.CODE} ${right.NAME}`
+        )
       })
       .map((article) => {
         const currentStock = Number(article.CURRENT_STOCK || 0)
@@ -687,21 +836,28 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
       .sort((left, right) => {
         const leftSuggestion = suggestionIndex.get(left.ARTICLE_ID)
         const rightSuggestion = suggestionIndex.get(right.ARTICLE_ID)
-        const compatibilityPriority = Number(Boolean(rightSuggestion)) - Number(Boolean(leftSuggestion))
+        const compatibilityPriority =
+          Number(Boolean(rightSuggestion)) - Number(Boolean(leftSuggestion))
 
         if (compatibilityPriority !== 0) {
           return compatibilityPriority
         }
 
         if (leftSuggestion && rightSuggestion) {
-          if (Number(rightSuggestion.inStock) !== Number(leftSuggestion.inStock)) {
-            return Number(rightSuggestion.inStock) - Number(leftSuggestion.inStock)
+          if (
+            Number(rightSuggestion.inStock) !== Number(leftSuggestion.inStock)
+          ) {
+            return (
+              Number(rightSuggestion.inStock) - Number(leftSuggestion.inStock)
+            )
           }
 
           return leftSuggestion.index - rightSuggestion.index
         }
 
-        return `${left.CODE} ${left.NAME}`.localeCompare(`${right.CODE} ${right.NAME}`)
+        return `${left.CODE} ${left.NAME}`.localeCompare(
+          `${right.CODE} ${right.NAME}`
+        )
       })
       .map((article) => {
         const suggestion = suggestionIndex.get(article.ARTICLE_ID)
@@ -725,7 +881,9 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
   const selectedArticleIdSet = useMemo(
     () =>
       new Set(
-        (watchedConsumedItems || []).map((item) => Number(item.ARTICLE_ID)).filter(Boolean)
+        (watchedConsumedItems || [])
+          .map((item) => Number(item.ARTICLE_ID))
+          .filter(Boolean)
       ),
     [watchedConsumedItems]
   )
@@ -806,13 +964,7 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
       size: 100,
       condition,
     })
-  }, [
-    debounceVehicle,
-    form,
-    getVehiclePagination,
-    open,
-    watchedCustomerId,
-  ])
+  }, [debounceVehicle, form, getVehiclePagination, open, watchedCustomerId])
 
   const handleSearchArticles = useCallback(() => {
     if (!open) return
@@ -849,6 +1001,11 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
         operator: '=',
         value: 'A',
       },
+      {
+        field: 'EMPLOYEE_TYPE' as never,
+        operator: '=',
+        value: 'OPERACIONAL',
+      },
     ]
 
     if (debounceTechnician) {
@@ -883,7 +1040,9 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
         CUSTOMER_ID: workOrder.CUSTOMER_ID,
         VEHICLE_ID: workOrder.VEHICLE_ID,
         STATUS_ID: workOrder.STATUS_ID,
-        PROMISED_AT: workOrder.PROMISED_AT ? dayjs(workOrder.PROMISED_AT) : undefined,
+        PROMISED_AT: workOrder.PROMISED_AT
+          ? dayjs(workOrder.PROMISED_AT)
+          : undefined,
         SYMPTOM: workOrder.SYMPTOM,
         DIAGNOSIS: workOrder.DIAGNOSIS,
         WORK_PERFORMED: workOrder.WORK_PERFORMED,
@@ -954,7 +1113,9 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
         CUSTOMER_ID: Number(values.CUSTOMER_ID),
         VEHICLE_ID: Number(values.VEHICLE_ID),
         STATUS_ID: values.STATUS_ID,
-        PROMISED_AT: values.PROMISED_AT ? values.PROMISED_AT.toISOString() : null,
+        PROMISED_AT: values.PROMISED_AT
+          ? values.PROMISED_AT.toISOString()
+          : null,
         SYMPTOM: `${values.SYMPTOM || ''}`.trim(),
         DIAGNOSIS: `${values.DIAGNOSIS || ''}`.trim() || null,
         WORK_PERFORMED: `${values.WORK_PERFORMED || ''}`.trim() || null,
@@ -962,7 +1123,8 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
         CUSTOMER_OBSERVATIONS:
           `${values.CUSTOMER_OBSERVATIONS || ''}`.trim() || null,
         REQUIRES_DISASSEMBLY: Boolean(values.REQUIRES_DISASSEMBLY),
-        STATUS_CHANGE_NOTES: `${values.STATUS_CHANGE_NOTES || ''}`.trim() || null,
+        STATUS_CHANGE_NOTES:
+          `${values.STATUS_CHANGE_NOTES || ''}`.trim() || null,
         SERVICE_LINES: (values.SERVICE_LINES || []).map((item) => ({
           SERVICE_TYPE: `${item.SERVICE_TYPE || 'SERVICIO'}`.trim(),
           DESCRIPTION: `${item.DESCRIPTION || ''}`.trim(),
@@ -985,11 +1147,13 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
           ROLE_ON_JOB: `${item.ROLE_ON_JOB || ''}`.trim() || null,
           IS_LEAD: Boolean(item.IS_LEAD),
           REFERENCE_PERCENT:
-            item.REFERENCE_PERCENT === null || item.REFERENCE_PERCENT === undefined
+            item.REFERENCE_PERCENT === null ||
+            item.REFERENCE_PERCENT === undefined
               ? null
               : Number(item.REFERENCE_PERCENT),
           REFERENCE_AMOUNT:
-            item.REFERENCE_AMOUNT === null || item.REFERENCE_AMOUNT === undefined
+            item.REFERENCE_AMOUNT === null ||
+            item.REFERENCE_AMOUNT === undefined
               ? null
               : Number(item.REFERENCE_AMOUNT),
           NOTES: `${item.NOTES || ''}`.trim() || null,
@@ -1035,7 +1199,8 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
         ...nextItems[existingIndex],
         QUANTITY: Number(nextItems[existingIndex].QUANTITY || 0) + 1,
         UNIT_COST_REFERENCE:
-          nextItems[existingIndex].UNIT_COST_REFERENCE ?? article.COST_REFERENCE,
+          nextItems[existingIndex].UNIT_COST_REFERENCE ??
+          article.COST_REFERENCE,
       }
     } else {
       nextItems.push({
@@ -1049,12 +1214,32 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
     form.setFieldValue('CONSUMED_ITEMS', nextItems)
   }
 
+  const handleQuickCustomerSaved = (customer: Customer) => {
+    setRecentCustomer(customer)
+    setQuickCustomerOpen(false)
+    form.setFieldsValue({
+      CUSTOMER_ID: customer.PERSON_ID,
+      VEHICLE_ID: undefined,
+    })
+    setSearchCustomerKey('')
+    setSearchVehicleKey('')
+  }
+
+  const handleQuickVehicleSaved = (vehicle: Vehicle) => {
+    setRecentVehicle(vehicle)
+    setQuickVehicleOpen(false)
+    form.setFieldValue('VEHICLE_ID', vehicle.VEHICLE_ID)
+    setSearchVehicleKey('')
+  }
+
   return (
     <>
       <CustomModal
         width={'80%'}
         closable
-        title={workOrderId ? 'Editar orden de trabajo' : 'Nueva orden de trabajo'}
+        title={
+          workOrderId ? 'Editar orden de trabajo' : 'Nueva orden de trabajo'
+        }
         open={open}
         onCancel={handleClose}
         onOk={handleFinish}
@@ -1110,6 +1295,51 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
                 </CustomFormItem>
               </CustomCol>
 
+              <CustomCol xs={24}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 12,
+                    flexWrap: 'wrap',
+                    marginTop: -8,
+                    marginBottom: 8,
+                    padding: '10px 12px',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: 12,
+                  }}
+                >
+                  <CustomText type={'secondary'}>
+                    Cree la OT desde esta misma pantalla. Si faltan datos, puede
+                    registrar el cliente o el vehículo sin salir del formulario.
+                  </CustomText>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: 8,
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <CustomButton
+                      type={'link'}
+                      onClick={() => setQuickCustomerOpen(true)}
+                    >
+                      Nuevo cliente rápido
+                    </CustomButton>
+
+                    <CustomButton
+                      type={'link'}
+                      disabled={!watchedCustomerId}
+                      onClick={() => setQuickVehicleOpen(true)}
+                    >
+                      Nuevo vehículo
+                    </CustomButton>
+                  </div>
+                </div>
+              </CustomCol>
+
               <CustomCol {...defaultBreakpoints}>
                 <CustomFormItem label={'Estado'} name={'STATUS_ID'}>
                   <CustomSelect
@@ -1132,7 +1362,9 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
                   rules={[{ required: true }]}
                   {...labelColFullWidth}
                 >
-                  <CustomTextArea placeholder={'Descripción del problema reportado'} />
+                  <CustomTextArea
+                    placeholder={'Descripción del problema reportado'}
+                  />
                 </CustomFormItem>
               </CustomCol>
 
@@ -1221,9 +1453,33 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
                       field={field}
                       form={form}
                       serviceTypeOptions={serviceTypeOptions}
+                      serviceTypeMap={serviceTypeMap}
                     />
                   )}
                 </CustomCollapseFormList>
+              </CustomCol>
+
+              <CustomCol xs={24}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 12,
+                    marginTop: 12,
+                    padding: '10px 12px',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: 12,
+                  }}
+                >
+                  <CustomText type={'secondary'}>
+                    {(watchedServiceLines || []).length} servicio(s)
+                    registrados.
+                  </CustomText>
+                  <CustomTag color={'gold'}>
+                    Total servicios: {formatAmount(serviceLinesTotal)}
+                  </CustomTag>
+                </div>
               </CustomCol>
 
               <CustomDivider>
@@ -1249,20 +1505,24 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
 
                       <CustomCol xs={24}>
                         <CustomText type={'secondary'}>
-                          Se priorizan primero los artículos compatibles con stock
-                          disponible.
+                          Se priorizan primero los artículos compatibles con
+                          stock disponible.
                         </CustomText>
                       </CustomCol>
 
                       {!compatibleArticleSuggestions.length ? (
                         <CustomCol xs={24}>
                           <CustomText type={'secondary'}>
-                            No hay artículos compatibles sugeridos para este vehículo.
+                            No hay artículos compatibles sugeridos para este
+                            vehículo.
                           </CustomText>
                         </CustomCol>
                       ) : (
                         compatibleArticleSuggestions.map((suggestion) => (
-                          <CustomCol xs={24} key={suggestion.article.ARTICLE_ID}>
+                          <CustomCol
+                            xs={24}
+                            key={suggestion.article.ARTICLE_ID}
+                          >
                             <div
                               style={{
                                 display: 'flex',
@@ -1281,16 +1541,19 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
                             >
                               <div>
                                 <CustomText strong>
-                                  {suggestion.article.CODE} - {suggestion.article.NAME}
+                                  {suggestion.article.CODE} -{' '}
+                                  {suggestion.article.NAME}
                                 </CustomText>
                                 <br />
                                 <CustomText style={{ fontSize: 12 }}>
-                                  {buildCompatibilityLabel(suggestion.article)} | Stock:{' '}
-                                  {suggestion.currentStock.toFixed(2)}
+                                  {buildCompatibilityLabel(suggestion.article)}{' '}
+                                  | Stock: {suggestion.currentStock.toFixed(2)}
                                 </CustomText>
                                 <div style={{ marginTop: 6 }}>
                                   <CustomTag
-                                    color={suggestion.inStock ? 'success' : 'error'}
+                                    color={
+                                      suggestion.inStock ? 'success' : 'error'
+                                    }
                                   >
                                     {suggestion.inStock
                                       ? 'Disponible'
@@ -1305,12 +1568,16 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
                               </div>
 
                               <CustomButton
-                                type={suggestion.inStock ? 'primary' : 'default'}
+                                type={
+                                  suggestion.inStock ? 'primary' : 'default'
+                                }
                                 onClick={() =>
                                   handleAddSuggestedArticle(suggestion.article)
                                 }
                               >
-                                {suggestion.alreadyAdded ? 'Agregar otro' : 'Agregar'}
+                                {suggestion.alreadyAdded
+                                  ? 'Agregar otro'
+                                  : 'Agregar'}
                               </CustomButton>
                             </div>
                           </CustomCol>
@@ -1345,7 +1612,9 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
                   {watchedVehicleId ? (
                     <CustomButton
                       type={'link'}
-                      onClick={() => setShowAllArticleOptions((current) => !current)}
+                      onClick={() =>
+                        setShowAllArticleOptions((current) => !current)
+                      }
                     >
                       {showAllArticleOptions
                         ? 'Mostrar solo compatibles'
@@ -1429,7 +1698,8 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
                       mode={'left'}
                       items={workOrder.STATUS_HISTORY.map((item) => ({
                         color:
-                          statusTimelineColorByCode[item.STATUS_CODE] || '#1677ff',
+                          statusTimelineColorByCode[item.STATUS_CODE] ||
+                          '#1677ff',
                         children: (
                           <CustomText>
                             {item.STATUS_NAME} - {item.CHANGED_BY_NAME} -{' '}
@@ -1446,6 +1716,20 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
           </CustomForm>
         </CustomSpin>
       </CustomModal>
+      <CustomerForm
+        open={quickCustomerOpen}
+        onClose={() => setQuickCustomerOpen(false)}
+        onSaved={handleQuickCustomerSaved}
+      />
+      <VehicleForm
+        open={quickVehicleOpen}
+        defaultCustomerId={
+          watchedCustomerId ? Number(watchedCustomerId) : undefined
+        }
+        disableCustomerSelection={Boolean(watchedCustomerId)}
+        onClose={() => setQuickVehicleOpen(false)}
+        onSaved={handleQuickVehicleSaved}
+      />
       {contextHolder}
     </>
   )

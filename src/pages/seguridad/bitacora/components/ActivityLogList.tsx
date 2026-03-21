@@ -26,6 +26,11 @@ const actionColorMap: Record<string, string> = {
   DELETE: 'error',
 }
 
+const employeeTypeColorMap: Record<string, string> = {
+  OPERACIONAL: 'blue',
+  ADMINISTRATIVO: 'purple',
+}
+
 const formatDate = (value?: string | null) =>
   value ? dayjs(value).format('DD/MM/YYYY HH:mm') : 'N/A'
 
@@ -40,6 +45,15 @@ const ActivityLogList: React.FC<ActivityLogListProps> = ({
     ACTION: 'Acción',
     MODEL: 'Entidad',
     OBJECT_ID: 'Objeto',
+    EMPLOYEE_TYPE: {
+      header: 'Tipo',
+      render: (value) =>
+        value === 'ADMINISTRATIVO'
+          ? 'Administrativo'
+          : value === 'OPERACIONAL'
+            ? 'Operacional'
+            : 'N/D',
+    },
     USERNAME: 'Usuario',
     STAFF_NAME: 'Personal',
     CREATED_AT: {
@@ -74,6 +88,15 @@ const ActivityLogList: React.FC<ActivityLogListProps> = ({
           >
             <CustomTag color={actionColorMap[item.ACTION] || 'default'}>
               <CustomText style={{ fontSize: 12 }}>{item.ACTION}</CustomText>
+            </CustomTag>
+            <CustomTag color={employeeTypeColorMap[item.EMPLOYEE_TYPE] || 'default'}>
+              <CustomText style={{ fontSize: 12 }}>
+                {item.EMPLOYEE_TYPE === 'ADMINISTRATIVO'
+                  ? 'Administrativo'
+                  : item.EMPLOYEE_TYPE === 'OPERACIONAL'
+                    ? 'Operacional'
+                    : 'N/D'}
+              </CustomText>
             </CustomTag>
             <CustomText style={{ fontSize: 12 }}>
               {item.USERNAME || item.STAFF_NAME || 'N/D'}

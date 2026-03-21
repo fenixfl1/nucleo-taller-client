@@ -11,10 +11,16 @@ import {
 const EMPTY_SUMMARY: WorkshopDashboardSummary = {
   activeCustomers: 0,
   activeVehicles: 0,
+  activeServiceVehicles: 0,
   activeArticles: 0,
   activeWorkOrders: 0,
   readyForDelivery: 0,
   totalDeliveries: 0,
+  availableServiceVehicles: 0,
+  pendingServiceVehicleMaintenance: 0,
+  overdueServiceVehicleMaintenance: 0,
+  totalServiceVehicleUsageHours: 0,
+  totalServiceVehicleUsageKilometers: 0,
 }
 
 const EMPTY_DASHBOARD: WorkshopDashboardSnapshot = {
@@ -23,6 +29,10 @@ const EMPTY_DASHBOARD: WorkshopDashboardSnapshot = {
   readyForDeliveryOrders: [],
   recentMovements: [],
   recentDeliveries: [],
+  recentServiceVehicles: [],
+  fleetMaintenanceAlerts: [],
+  fleetUsageSummary: [],
+  fleetAvailability: [],
 }
 
 export function useGetWorkshopDashboardQuery() {

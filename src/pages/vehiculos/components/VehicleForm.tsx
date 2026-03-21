@@ -33,6 +33,9 @@ interface VehicleFormProps {
   vehicle?: Vehicle
   onClose?: () => void
   onSuccess?: () => void
+  onSaved?: (vehicle: Vehicle) => void
+  defaultCustomerId?: number
+  disableCustomerSelection?: boolean
 }
 
 type VehicleFormValues = {
@@ -52,6 +55,9 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
   vehicle,
   onClose,
   onSuccess,
+  onSaved,
+  defaultCustomerId,
+  disableCustomerSelection = false,
 }) => {
   const notification = useAppNotification()
   const [errorHandler] = useErrorHandler()
@@ -112,7 +118,10 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
     }
 
     form.resetFields()
-  }, [form, vehicle, open])
+    form.setFieldsValue({
+      CUSTOMER_ID: defaultCustomerId,
+    })
+  }, [defaultCustomerId, form, vehicle, open])
 
   const handleCancel = () => {
     form.resetFields()
@@ -144,21 +153,23 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
       }
 
       let description = 'Vehículo registrado exitosamente.'
+      let savedVehicle: Vehicle
 
       if (vehicle?.VEHICLE_ID) {
-        await updateVehicle({
+        savedVehicle = await updateVehicle({
           ...payload,
           VEHICLE_ID: vehicle.VEHICLE_ID,
         })
         description = 'Vehículo actualizado exitosamente.'
       } else {
-        await createVehicle(payload)
+        savedVehicle = await createVehicle(payload)
       }
 
       notification({
         message: 'Operación exitosa',
         description,
       })
+      onSaved?.(savedVehicle)
       onSuccess?.()
       handleCancel()
     } catch (error) {
@@ -194,6 +205,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
                   {...labelColFullWidth}
                 >
                   <CustomSelect
+                    disabled={disableCustomerSelection}
                     placeholder={'Seleccionar cliente'}
                     onSearch={setSearchCustomerKey}
                     options={customerList.map((customer) => ({

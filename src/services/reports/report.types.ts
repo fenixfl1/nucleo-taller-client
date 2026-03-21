@@ -6,6 +6,13 @@ export interface OperationalReportSummary {
   INVENTORY_CONSUMPTION_QUANTITY: number
   ARTICLES_BELOW_MINIMUM: number
   AVERAGE_CLOSURE_DAYS: number
+  ACTIVE_SERVICE_VEHICLES: number
+  SERVICE_VEHICLE_HISTORY_EVENTS: number
+  PENDING_SERVICE_VEHICLE_MAINTENANCE: number
+  OVERDUE_SERVICE_VEHICLE_MAINTENANCE: number
+  AVAILABLE_SERVICE_VEHICLES: number
+  TOTAL_SERVICE_VEHICLE_USAGE_HOURS: number
+  TOTAL_SERVICE_VEHICLE_USAGE_KILOMETERS: number
 }
 
 export interface WorkOrdersByStatusReportItem {
@@ -41,21 +48,87 @@ export interface TopTechnicianReportItem {
   TOTAL_ASSIGNED_ORDERS: number
   LEAD_ORDERS: number
   DELIVERED_ORDERS: number
+  TOTAL_SERVICE_LINES: number
+  TOTAL_REFERENCE_AMOUNT: number
+}
+
+export interface ServiceVehiclesByStateReportItem {
+  STATE: string
+  TOTAL: number
+}
+
+export interface ServiceVehicleFleetReportItem {
+  BRAND: string
+  MODEL: string
+  TOTAL: number
+}
+
+export interface ServiceVehicleHistoryReportItem {
+  ID: number
+  ACTION: string
+  VEHICLE_NAME: string
+  PLATE: string
+  ACTOR_NAME: string
+  USERNAME: string
+  EMPLOYEE_TYPE: string
+  CREATED_AT: string | null
+}
+
+export interface ServiceVehicleMaintenanceByVehicleReportItem {
+  SERVICE_VEHICLE_ID: number
+  VEHICLE_NAME: string
+  PLATE: string
+  PENDING_TOTAL: number
+  OVERDUE_TOTAL: number
+  NEXT_SCHEDULED_AT: string | null
+}
+
+export interface ServiceVehicleUsageByVehicleReportItem {
+  SERVICE_VEHICLE_ID: number
+  VEHICLE_NAME: string
+  PLATE: string
+  TOTAL_USAGES: number
+  TOTAL_HOURS: number
+  TOTAL_KILOMETERS: number
+  LAST_USAGE_AT: string | null
+}
+
+export interface ServiceVehicleAvailabilityReportItem {
+  SERVICE_VEHICLE_ID: number
+  VEHICLE_NAME: string
+  PLATE: string
+  BRAND: string
+  MODEL: string
+  AVAILABILITY_STATUS: string
+  CURRENT_USAGE_COUNT: number
+  OPEN_MAINTENANCE_COUNT: number
+  IN_PROGRESS_MAINTENANCE_COUNT: number
 }
 
 export interface OperationalReport {
   FILTERS: {
     START_DATE: string | null
     END_DATE: string | null
+    EMPLOYEE_TYPE: 'OPERACIONAL' | 'ADMINISTRATIVO' | null
+    STAFF_ID: number | null
+    STAFF_LABEL: string | null
   }
   SUMMARY: OperationalReportSummary
   WORK_ORDERS_BY_STATUS: WorkOrdersByStatusReportItem[]
   TOP_CONSUMED_ARTICLES: TopConsumedArticleReportItem[]
   LOW_STOCK_ARTICLES: LowStockArticleReportItem[]
   TOP_TECHNICIANS: TopTechnicianReportItem[]
+  SERVICE_VEHICLES_BY_STATE: ServiceVehiclesByStateReportItem[]
+  SERVICE_VEHICLE_FLEET: ServiceVehicleFleetReportItem[]
+  SERVICE_VEHICLE_HISTORY: ServiceVehicleHistoryReportItem[]
+  SERVICE_VEHICLE_MAINTENANCE_BY_VEHICLE: ServiceVehicleMaintenanceByVehicleReportItem[]
+  SERVICE_VEHICLE_USAGE_BY_VEHICLE: ServiceVehicleUsageByVehicleReportItem[]
+  SERVICE_VEHICLE_AVAILABILITY: ServiceVehicleAvailabilityReportItem[]
 }
 
 export interface GetOperationalReportPayload {
   START_DATE?: string | null
   END_DATE?: string | null
+  EMPLOYEE_TYPE?: 'OPERACIONAL' | 'ADMINISTRATIVO' | null
+  STAFF_ID?: number | null
 }

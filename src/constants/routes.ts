@@ -23,6 +23,19 @@ export const API_PATH_VALIDATE_CUSTOMER_IDENTITY_DOCUMENT =
 export const API_PATH_CREATE_UPDATE_VEHICLE = '/vehicle'
 export const API_PATH_GET_VEHICLE_PAGINATION = '/vehicle/pagination'
 export const API_PATH_GET_ONE_VEHICLE = '/vehicle/'
+export const API_PATH_CREATE_UPDATE_SERVICE_VEHICLE = '/service_vehicle'
+export const API_PATH_GET_SERVICE_VEHICLE_PAGINATION =
+  '/service_vehicle/pagination'
+export const API_PATH_GET_ONE_SERVICE_VEHICLE = '/service_vehicle/'
+export const API_PATH_CREATE_UPDATE_SERVICE_VEHICLE_MAINTENANCE = '/service_vehicle_maintenance'
+export const API_PATH_GET_SERVICE_VEHICLE_MAINTENANCE_PAGINATION =
+  '/service_vehicle_maintenance/pagination'
+export const API_PATH_GET_ONE_SERVICE_VEHICLE_MAINTENANCE =
+  '/service_vehicle_maintenance/'
+export const API_PATH_CREATE_UPDATE_SERVICE_VEHICLE_USAGE = '/service_vehicle_usage'
+export const API_PATH_GET_SERVICE_VEHICLE_USAGE_PAGINATION =
+  '/service_vehicle_usage/pagination'
+export const API_PATH_GET_ONE_SERVICE_VEHICLE_USAGE = '/service_vehicle_usage/'
 export const API_PATH_CREATE_UPDATE_ARTICLE = '/article'
 export const API_PATH_GET_ARTICLE_PAGINATION = '/article/pagination'
 export const API_PATH_GET_ONE_ARTICLE = '/article/'

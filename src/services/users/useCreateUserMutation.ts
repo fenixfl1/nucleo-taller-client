@@ -18,6 +18,7 @@ interface CreateUserPayload {
   }>
   USERNAME: string
   ROLE_ID: number
+  EMPLOYEE_TYPE: 'OPERACIONAL' | 'ADMINISTRATIVO'
 }
 
 export function useCreateUserMutation() {

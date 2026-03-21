@@ -42,6 +42,11 @@ const UserList: React.FC<UserListProps> = ({ onUpdate, onEdit, onChange }) => {
       header: 'Teléfono',
       render: (value: string) => formatter({ value, format: 'phone' }),
     },
+    EMPLOYEE_TYPE: {
+      header: 'Tipo',
+      render: (value) =>
+        value === 'ADMINISTRATIVO' ? 'Administrativo' : 'Operacional',
+    },
     ROLES: 'Rol',
     CREATED_AT: 'F.Registro',
     CREATED_BY: 'Creado por',
@@ -105,6 +110,17 @@ const UserList: React.FC<UserListProps> = ({ onUpdate, onEdit, onChange }) => {
             >
               @{item.USERNAME}
             </CustomText>
+            <CustomTag color={item.EMPLOYEE_TYPE === 'ADMINISTRATIVO' ? 'blue' : 'cyan'}>
+              <CustomText
+                style={{ fontSize: 12, color: '#fffff' }}
+                disabled={item.STATE === 'I'}
+                delete={item.STATE === 'I'}
+              >
+                {item.EMPLOYEE_TYPE === 'ADMINISTRATIVO'
+                  ? 'Administrativo'
+                  : 'Operacional'}
+              </CustomText>
+            </CustomTag>
             <CustomSpace direction={'horizontal'}>
               {item.ROLES?.split(',').map((rol) => (
                 <CustomTag color={'success'}>
@@ -127,7 +143,7 @@ const UserList: React.FC<UserListProps> = ({ onUpdate, onEdit, onChange }) => {
   return (
     <CustomList
       columnsMap={columnsMap}
-      exportOptions={{ title: 'Lista de usuarios', orientation: 'landscape' }}
+      exportOptions={{ title: 'Lista de empleados', orientation: 'landscape' }}
       dataSource={userList}
       renderItem={renderItem}
       pagination={{

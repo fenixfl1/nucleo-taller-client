@@ -1,6 +1,7 @@
 export interface ActivityLogEntry {
   ID: number
   STAFF_ID: number
+  EMPLOYEE_TYPE: 'OPERACIONAL' | 'ADMINISTRATIVO' | string
   ACTION: 'INSERT' | 'UPDATE' | 'DELETE' | string
   MODEL: string
   OBJECT_ID: number | null

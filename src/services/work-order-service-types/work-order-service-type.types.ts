@@ -3,6 +3,7 @@ export interface WorkOrderServiceType {
   CODE: string
   NAME: string
   DESCRIPTION: string
+  BASE_PRICE: number
   ORDER_INDEX: number
   STATE: string
   SCOPE: 'BASE' | 'EMPRESA'
@@ -13,6 +14,7 @@ export interface WorkOrderServiceTypePayload {
   CODE: string
   NAME: string
   DESCRIPTION?: string | null
+  BASE_PRICE?: number
   ORDER_INDEX?: number
   STATE?: 'A' | 'I'
 }

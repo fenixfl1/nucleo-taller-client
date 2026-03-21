@@ -25,6 +25,7 @@ export interface User {
   CONTACTS?: UserContact[]
   STAFF_ID: number
   ROLE_ID: number
+  EMPLOYEE_TYPE: 'OPERACIONAL' | 'ADMINISTRATIVO'
 }
 
 export interface Business {

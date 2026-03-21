@@ -37,7 +37,9 @@ const LogoContainer = styled.div`
   img {
     width: 65%;
     max-width: 150px;
-    transition: width 0.2s ease, max-width 0.2s ease;
+    transition:
+      width 0.2s ease,
+      max-width 0.2s ease;
   }
 `
 
@@ -88,30 +90,6 @@ const Sider = styled(CustomSider)`
 `
 
 const Menu = styled(CustomMenu)`
-  border-right: 0;
-  background: transparent !important;
-
-  .ant-menu-item-icon,
-  .ant-menu-submenu-title .ant-menu-item-icon,
-  .ant-menu-submenu-title > .ant-menu-item-icon {
-    min-width: 20px;
-    margin-inline-end: 12px !important;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-  }
-
-  &.ant-menu-inline-collapsed {
-    width: 100% !important;
-  }
-
-  .ant-menu-item,
-  .ant-menu-submenu-title {
-    margin-inline: 0 !important;
-    width: 100% !important;
-  }
-
   &.ant-menu-inline-collapsed > .ant-menu-item,
   &.ant-menu-inline-collapsed > .ant-menu-submenu > .ant-menu-submenu-title {
     padding-inline: 0 !important;
@@ -124,17 +102,15 @@ const Menu = styled(CustomMenu)`
     border-radius: 16px;
   }
 
+  &.ant-menu-inline-collapsed > .ant-menu-item .ant-menu-title-content,
   &.ant-menu-inline-collapsed
-      > .ant-menu-item
-      .ant-menu-title-content,
+    > .ant-menu-submenu
+    > .ant-menu-submenu-title
+    .ant-menu-title-content,
   &.ant-menu-inline-collapsed
-      > .ant-menu-submenu
-      > .ant-menu-submenu-title
-      .ant-menu-title-content,
-  &.ant-menu-inline-collapsed
-      > .ant-menu-submenu
-      > .ant-menu-submenu-title
-      .ant-menu-submenu-arrow {
+    > .ant-menu-submenu
+    > .ant-menu-submenu-title
+    .ant-menu-submenu-arrow {
     display: none !important;
     width: 0 !important;
     opacity: 0 !important;
@@ -143,16 +119,20 @@ const Menu = styled(CustomMenu)`
 
   &.ant-menu-inline-collapsed > .ant-menu-item .ant-menu-item-icon,
   &.ant-menu-inline-collapsed
-      > .ant-menu-submenu
-      > .ant-menu-submenu-title
-      .ant-menu-item-icon,
+    > .ant-menu-submenu
+    > .ant-menu-submenu-title
+    .ant-menu-item-icon,
   &.ant-menu-inline-collapsed
-      > .ant-menu-submenu
-      > .ant-menu-submenu-title
-      > .ant-menu-item-icon {
+    > .ant-menu-submenu
+    > .ant-menu-submenu-title
+    > .ant-menu-item-icon {
     margin-inline-end: 0 !important;
     min-width: 24px;
     font-size: 0;
+  }
+
+  .ant-menu-title-content {
+    margin-left: 10px !important;
   }
 `
 

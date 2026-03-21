@@ -246,6 +246,7 @@ type UserFormValues = {
   CONTACTS?: ContactFormValue[]
   USERNAME: string
   ROLE_ID: number
+  EMPLOYEE_TYPE: 'OPERACIONAL' | 'ADMINISTRATIVO'
 }
 
 const UserForm: React.FC<UserFormProps> = ({ open, onClose, user }) => {
@@ -277,11 +278,13 @@ const UserForm: React.FC<UserFormProps> = ({ open, onClose, user }) => {
         CONTACTS: getInitialContacts(user),
         USERNAME: user.USERNAME,
         ROLE_ID: Number(user.ROLE_ID),
+        EMPLOYEE_TYPE: user.EMPLOYEE_TYPE || 'OPERACIONAL',
       })
       return
     }
 
     form.resetFields()
+    form.setFieldsValue({ EMPLOYEE_TYPE: 'OPERACIONAL' })
   }, [form, user, open])
 
   const handleSearchRole = useCallback(() => {
@@ -326,14 +329,14 @@ const UserForm: React.FC<UserFormProps> = ({ open, onClose, user }) => {
       }
 
       let description =
-        'Usuario creado exitosamente junto con los datos de la persona.'
+        'Empleado creado exitosamente junto con los datos de la persona.'
 
       if (user) {
         await updateUser({
           ...payload,
           USER_ID: user.USER_ID,
         })
-        description = 'Usuario actualizado exitosamente.'
+        description = 'Empleado actualizado exitosamente.'
       } else {
         await createUser(payload)
       }
@@ -363,7 +366,7 @@ const UserForm: React.FC<UserFormProps> = ({ open, onClose, user }) => {
       <CustomModal
         width={'60%'}
         closable
-        title={'Formulario de usuario'}
+        title={'Formulario de empleado'}
         open={open}
         onCancel={handleClose}
         onOk={handleFinish}
@@ -500,7 +503,23 @@ const UserForm: React.FC<UserFormProps> = ({ open, onClose, user }) => {
 
               <CustomCol {...defaultBreakpoints}>
                 <CustomFormItem
-                  label={'Rol'}
+                  label={'Tipo de empleado'}
+                  name={'EMPLOYEE_TYPE'}
+                  rules={[{ required: true }]}
+                >
+                  <CustomSelect
+                    placeholder={'Seleccionar tipo'}
+                    options={[
+                      { label: 'Operacional', value: 'OPERACIONAL' },
+                      { label: 'Administrativo', value: 'ADMINISTRATIVO' },
+                    ]}
+                  />
+                </CustomFormItem>
+              </CustomCol>
+
+              <CustomCol {...defaultBreakpoints}>
+                <CustomFormItem
+                  label={'Rol de acceso'}
                   name={'ROLE_ID'}
                   noSpaces
                   rules={[{ required: true }]}

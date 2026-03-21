@@ -21,6 +21,7 @@ import UserForm from 'src/pages/users/components/UserForm'
 const initialFilter = {
   FILTER: {
     STATE__IN: ['A', 'I'],
+    EMPLOYEE_TYPE__IN: ['OPERACIONAL', 'ADMINISTRATIVO'],
   },
 }
 
@@ -57,7 +58,7 @@ const SeguridadUsuariosPage: React.FC = () => {
       const filter = getConditionFromForm(FILTER)
       getUserPagination({ page, size, condition: [...condition, ...filter] })
     },
-    [debounce, form, getUserPagination, metadata, userModalState]
+    [debounce, userModalState]
   )
 
   useEffect(handleSearch, [handleSearch])
@@ -67,7 +68,7 @@ const SeguridadUsuariosPage: React.FC = () => {
   const handleChangeState = (user: User) => {
     modal.confirm({
       title: 'Confirmación',
-      content: 'Seguro que desea cambiar el estado del usuario?',
+      content: 'Seguro que desea cambiar el estado del empleado?',
       onOk: async () => {
         try {
           await updateUser({
@@ -78,7 +79,7 @@ const SeguridadUsuariosPage: React.FC = () => {
 
           notification.success({
             message: 'Operación exitosa',
-            description: 'El estado del usuario fue actualizado con éxito.',
+            description: 'El estado del empleado fue actualizado con éxito.',
           })
 
           handleSearch()
@@ -106,6 +107,22 @@ const SeguridadUsuariosPage: React.FC = () => {
           ]}
         />
       </CustomFormItem>
+
+      <CustomFormItem
+        label={'Tipo'}
+        name={['FILTER', 'EMPLOYEE_TYPE__IN']}
+        labelCol={{ span: 24 }}
+      >
+        <CustomSelect
+          style={{ minWidth: '15rem' }}
+          placeholder={'Seleccionar tipos'}
+          mode={'multiple'}
+          options={[
+            { label: 'Operacionales', value: 'OPERACIONAL' },
+            { label: 'Administrativos', value: 'ADMINISTRATIVO' },
+          ]}
+        />
+      </CustomFormItem>
     </CustomRow>
   )
 
@@ -115,8 +132,8 @@ const SeguridadUsuariosPage: React.FC = () => {
         <CustomCard style={{ padding: 15 }}>
           <SearchBar
             form={form}
-            createText={'Nuevo Usuario'}
-            searchPlaceholder={'Buscar usuarios...'}
+            createText={'Nuevo empleado'}
+            searchPlaceholder={'Buscar empleados...'}
             onSearch={setSearchKey}
             onCreate={toggleModalState}
             filterContent={filterContent}

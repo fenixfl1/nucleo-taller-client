@@ -52,13 +52,14 @@ const WorkOrderServiceTypeForm: React.FC<WorkOrderServiceTypeFormProps> = ({
         CODE: serviceType.CODE,
         NAME: serviceType.NAME,
         DESCRIPTION: serviceType.DESCRIPTION,
+        BASE_PRICE: serviceType.BASE_PRICE,
         ORDER_INDEX: serviceType.ORDER_INDEX,
       })
       return
     }
 
     form.resetFields()
-    form.setFieldsValue({ ORDER_INDEX: 0 })
+    form.setFieldsValue({ BASE_PRICE: 0, ORDER_INDEX: 0 })
   }, [form, open, serviceType])
 
   const handleCancel = () => {
@@ -83,17 +84,18 @@ const WorkOrderServiceTypeForm: React.FC<WorkOrderServiceTypeFormProps> = ({
         CODE: `${values.CODE || ''}`.trim().toUpperCase(),
         NAME: `${values.NAME || ''}`.trim(),
         DESCRIPTION: `${values.DESCRIPTION || ''}`.trim() || null,
+        BASE_PRICE: Number(values.BASE_PRICE || 0),
         ORDER_INDEX: Number(values.ORDER_INDEX || 0),
       }
 
-      let description = 'Tipo de servicio registrado exitosamente.'
+      let description = 'Servicio registrado exitosamente.'
 
       if (serviceType?.SERVICE_TYPE_ID) {
         await updateRow({
           ...payload,
           SERVICE_TYPE_ID: serviceType.SERVICE_TYPE_ID,
         })
-        description = 'Tipo de servicio actualizado exitosamente.'
+        description = 'Servicio actualizado exitosamente.'
       } else {
         await createRow(payload)
       }
@@ -114,7 +116,7 @@ const WorkOrderServiceTypeForm: React.FC<WorkOrderServiceTypeFormProps> = ({
       <CustomModal
         width={'60%'}
         closable
-        title={'Formulario de tipo de servicio'}
+        title={'Formulario de servicio'}
         open={open}
         onCancel={handleClose}
         onOk={handleFinish}
@@ -141,6 +143,22 @@ const WorkOrderServiceTypeForm: React.FC<WorkOrderServiceTypeFormProps> = ({
                   rules={[{ required: true }]}
                 >
                   <CustomInput placeholder={'Nombre'} />
+                </CustomFormItem>
+              </CustomCol>
+
+              <CustomCol {...defaultBreakpoints}>
+                <CustomFormItem
+                  label={'Precio base'}
+                  name={'BASE_PRICE'}
+                  rules={[{ required: true }]}
+                >
+                  <CustomInputNumber
+                    style={{ width: '100%' }}
+                    min={0}
+                    precision={2}
+                    step={0.01}
+                    placeholder={'0.00'}
+                  />
                 </CustomFormItem>
               </CustomCol>
 

@@ -41,6 +41,11 @@ const actionColorMap: Record<string, string> = {
   DELETE: 'error',
 }
 
+const employeeTypeColorMap: Record<string, string> = {
+  OPERACIONAL: 'blue',
+  ADMINISTRATIVO: 'purple',
+}
+
 const formatDate = (value?: string | null) =>
   value ? dayjs(value).format('DD/MM/YYYY HH:mm:ss') : 'N/A'
 
@@ -109,6 +114,21 @@ const ActivityLogDetailDrawer: React.FC<ActivityLogDetailDrawerProps> = ({
       key: 'staff',
       label: 'Personal',
       children: activityLog?.STAFF_NAME || 'N/D',
+    },
+    {
+      key: 'employee-type',
+      label: 'Tipo de empleado',
+      children: (
+        <CustomTag
+          color={employeeTypeColorMap[activityLog?.EMPLOYEE_TYPE || ''] || 'default'}
+        >
+          {activityLog?.EMPLOYEE_TYPE === 'ADMINISTRATIVO'
+            ? 'Administrativo'
+            : activityLog?.EMPLOYEE_TYPE === 'OPERACIONAL'
+              ? 'Operacional'
+              : 'N/D'}
+        </CustomTag>
+      ),
     },
     {
       key: 'created-at',

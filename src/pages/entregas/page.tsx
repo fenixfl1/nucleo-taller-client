@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Form } from 'antd'
+import { useLocation, useNavigate } from 'react-router'
 import SearchBar from 'src/components/SearchBar'
 import useDebounce from 'src/hooks/use-debounce'
 import CustomCard from 'src/components/custom/CustomCard'
@@ -25,6 +26,8 @@ const initialFilter = {
 
 const DeliveriesPage: React.FC = () => {
   const [form] = Form.useForm()
+  const location = useLocation()
+  const navigate = useNavigate()
   const [modalState, setModalState] = useState(false)
   const [detailState, setDetailState] = useState(false)
   const [selectedReceipt, setSelectedReceipt] = useState<DeliveryReceipt>()
@@ -61,6 +64,25 @@ const DeliveriesPage: React.FC = () => {
   )
 
   useEffect(handleSearch, [handleSearch])
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+
+    if (params.get('action') !== 'create') {
+      return
+    }
+
+    setSelectedReceipt(undefined)
+    setModalState(true)
+    params.delete('action')
+    navigate(
+      {
+        pathname: location.pathname,
+        search: params.toString() ? `?${params.toString()}` : '',
+      },
+      { replace: true }
+    )
+  }, [location.pathname, location.search, navigate])
 
   const filterContent = (
     <CustomRow width={'100%'}>

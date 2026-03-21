@@ -32,6 +32,10 @@ const WorkOrderServiceTypeList: React.FC<WorkOrderServiceTypeListProps> = ({
     CODE: 'Código',
     NAME: 'Nombre',
     DESCRIPTION: 'Descripción',
+    BASE_PRICE: {
+      header: 'Precio base',
+      render: (value) => Number(value || 0).toFixed(2),
+    },
     ORDER_INDEX: 'Orden',
     SCOPE: 'Alcance',
     STATE: {
@@ -79,6 +83,9 @@ const WorkOrderServiceTypeList: React.FC<WorkOrderServiceTypeListProps> = ({
             split={<CustomDivider type={'vertical'} />}
           >
             <CustomText style={{ fontSize: 12 }}>{item.CODE}</CustomText>
+            <CustomText style={{ fontSize: 12 }}>
+              Precio base: {Number(item.BASE_PRICE || 0).toFixed(2)}
+            </CustomText>
             <CustomText style={{ fontSize: 12 }}>Orden: {item.ORDER_INDEX}</CustomText>
             <CustomTag color={item.SCOPE === 'BASE' ? 'blue' : 'purple'}>
               <CustomText style={{ fontSize: 12 }}>{item.SCOPE}</CustomText>
@@ -97,7 +104,7 @@ const WorkOrderServiceTypeList: React.FC<WorkOrderServiceTypeListProps> = ({
   return (
     <CustomList
       columnsMap={columnsMap}
-      exportOptions={{ title: 'Tipos de servicio OT', orientation: 'landscape' }}
+      exportOptions={{ title: 'Servicios OT', orientation: 'landscape' }}
       dataSource={workOrderServiceTypeList}
       renderItem={renderItem}
       pagination={{

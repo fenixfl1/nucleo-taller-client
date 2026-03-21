@@ -1,7 +1,9 @@
+import { DownloadOutlined, EyeOutlined } from '@ant-design/icons'
 import { DescriptionsProps, Empty } from 'antd'
 import dayjs from 'dayjs'
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import ConditionalComponent from 'src/components/ConditionalComponent'
+import CustomButton from 'src/components/custom/CustomButton'
 import CustomDescriptions from 'src/components/custom/CustomDescription'
 import CustomDivider from 'src/components/custom/CustomDivider'
 import CustomDrawer from 'src/components/custom/CustomDrawer'
@@ -9,12 +11,15 @@ import CustomList from 'src/components/custom/CustomList'
 import CustomListItem from 'src/components/custom/CustomListItem'
 import CustomListItemMeta from 'src/components/custom/CustomListItemMeta'
 import { CustomText, CustomTitle } from 'src/components/custom/CustomParagraph'
+import CustomSpace from 'src/components/custom/CustomSpace'
 import CustomSpin from 'src/components/custom/CustomSpin'
 import CustomTag from 'src/components/custom/CustomTag'
 import CustomTimeline from 'src/components/custom/CustomTimeline'
 import { useGetCompatibleArticlesByVehicleQuery } from 'src/services/articles/useGetCompatibleArticlesByVehicleQuery'
 import { Article } from 'src/services/articles/article.types'
 import { useGetOneWorkOrderQuery } from 'src/services/work-orders/useGetOneWorkOrderQuery'
+import { downloadWorkOrderPdf } from 'src/utils/work-order-pdf'
+import WorkOrderPreviewModal from './WorkOrderPreviewModal'
 
 interface WorkOrderDetailDrawerProps {
   workOrderId?: number
@@ -65,11 +70,14 @@ const buildCompatibilityLabel = (article: Article): string => {
     .join(' ')
 }
 
+const formatAmount = (value: number) => Number(value || 0).toFixed(2)
+
 const WorkOrderDetailDrawer: React.FC<WorkOrderDetailDrawerProps> = ({
   workOrderId,
   open,
   onClose,
 }) => {
+  const [previewOpen, setPreviewOpen] = useState(false)
   const {
     data: workOrder,
     isLoading,
@@ -93,6 +101,19 @@ const WorkOrderDetailDrawer: React.FC<WorkOrderDetailDrawerProps> = ({
         ])
       ),
     [compatibleArticles]
+  )
+
+  const serviceLinesTotal = useMemo(
+    () =>
+      Number(
+        ((workOrder?.SERVICE_LINES || []).reduce((accumulator, item) => {
+          return (
+            accumulator +
+            Number(item?.QUANTITY || 0) * Number(item?.REFERENCE_AMOUNT || 0)
+          )
+        }, 0) || 0).toFixed(2)
+      ),
+    [workOrder?.SERVICE_LINES]
   )
 
   const descriptionItems: DescriptionsProps['items'] = [
@@ -184,6 +205,27 @@ const WorkOrderDetailDrawer: React.FC<WorkOrderDetailDrawerProps> = ({
       width={'55%'}
       closable={false}
       title={'Detalle de orden de trabajo'}
+      extra={
+        <CustomSpace direction={'horizontal'} width={'auto'}>
+          <CustomButton
+            icon={<EyeOutlined />}
+            disabled={!workOrder}
+            onClick={() => setPreviewOpen(true)}
+          >
+            Vista previa
+          </CustomButton>
+          <CustomButton
+            type={'primary'}
+            icon={<DownloadOutlined />}
+            disabled={!workOrder}
+            onClick={() =>
+              workOrder ? void downloadWorkOrderPdf(workOrder) : undefined
+            }
+          >
+            PDF
+          </CustomButton>
+        </CustomSpace>
+      }
     >
       <CustomSpin
         spinning={
@@ -202,6 +244,11 @@ const WorkOrderDetailDrawer: React.FC<WorkOrderDetailDrawerProps> = ({
             condition={Boolean(workOrder?.SERVICE_LINES?.length)}
             fallback={<Empty description={'Sin servicios registrados'} />}
           >
+            <div style={{ marginBottom: 12 }}>
+              <CustomTag color={'gold'}>
+                Total servicios: {formatAmount(serviceLinesTotal)}
+              </CustomTag>
+            </div>
             <CustomList
               dataSource={workOrder?.SERVICE_LINES || []}
               renderItem={(item) => (
@@ -214,9 +261,13 @@ const WorkOrderDetailDrawer: React.FC<WorkOrderDetailDrawerProps> = ({
                     }
                     description={
                       <CustomText style={{ fontSize: 12 }}>
-                        Cantidad: {Number(item.QUANTITY || 0).toFixed(2)} | Monto Ref.:
+                        Cantidad: {Number(item.QUANTITY || 0).toFixed(2)} | Precio Ref.:
                         {' '}
-                        {Number(item.REFERENCE_AMOUNT || 0).toFixed(2)}
+                        {formatAmount(Number(item.REFERENCE_AMOUNT || 0))} | Total:{' '}
+                        {formatAmount(
+                          Number(item.QUANTITY || 0) *
+                            Number(item.REFERENCE_AMOUNT || 0)
+                        )}
                         {item.NOTES ? ` | ${item.NOTES}` : ''}
                       </CustomText>
                     }
@@ -338,6 +389,11 @@ const WorkOrderDetailDrawer: React.FC<WorkOrderDetailDrawerProps> = ({
           </ConditionalComponent>
         </ConditionalComponent>
       </CustomSpin>
+      <WorkOrderPreviewModal
+        open={previewOpen}
+        workOrder={workOrder}
+        onClose={() => setPreviewOpen(false)}
+      />
     </CustomDrawer>
   )
 }
