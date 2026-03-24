@@ -500,6 +500,7 @@ const TechnicianCollapseItem: React.FC<{
         <CustomFormItem
           label={'Técnico'}
           name={[field.name, 'STAFF_ID']}
+          {...labelColFullWidth}
           rules={[
             { required: true, message: 'Seleccione un técnico.' },
             {
@@ -1360,6 +1361,9 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({
                   label={'Síntoma'}
                   name={'SYMPTOM'}
                   rules={[{ required: true }]}
+                  tooltip={
+                    'Descripción de los problemas que presenta el vehículo'
+                  }
                   {...labelColFullWidth}
                 >
                   <CustomTextArea

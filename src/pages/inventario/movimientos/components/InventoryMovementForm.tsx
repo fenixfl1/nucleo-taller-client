@@ -80,6 +80,7 @@ const MovementDetailCollapseItem: React.FC<{
         <CustomFormItem
           label={'Artículo'}
           name={[field.name, 'ARTICLE_ID']}
+          {...labelColFullWidth}
           rules={[
             { required: true, message: 'Seleccione un artículo.' },
             {
@@ -172,10 +173,8 @@ const InventoryMovementForm: React.FC<InventoryMovementFormProps> = ({
 
   const { mutate: getArticlePagination, isPending: isGetArticlesPending } =
     useGetArticlePaginationMutation()
-  const {
-    mutateAsync: createInventoryMovement,
-    isPending: isCreatePending,
-  } = useCreateInventoryMovementMutation()
+  const { mutateAsync: createInventoryMovement, isPending: isCreatePending } =
+    useCreateInventoryMovementMutation()
   const { data: movementTypeList = [], isLoading: isTypeListLoading } =
     useGetInventoryMovementTypeListQuery()
 
@@ -310,7 +309,9 @@ const InventoryMovementForm: React.FC<InventoryMovementFormProps> = ({
         <div style={{ marginTop: 20 }} />
         <CustomSpin
           spinning={
-            isCreatePending || isGetArticlesPending || Boolean(isTypeListLoading)
+            isCreatePending ||
+            isGetArticlesPending ||
+            Boolean(isTypeListLoading)
           }
         >
           <CustomForm form={form} {...formItemLayout}>
@@ -327,10 +328,12 @@ const InventoryMovementForm: React.FC<InventoryMovementFormProps> = ({
                 >
                   <CustomSelect
                     placeholder={'Seleccionar tipo'}
-                    options={manualMovementTypes.map((item: InventoryMovementType) => ({
-                      value: item.CODE,
-                      label: movementTypeLabels[item.CODE] || item.NAME,
-                    }))}
+                    options={manualMovementTypes.map(
+                      (item: InventoryMovementType) => ({
+                        value: item.CODE,
+                        label: movementTypeLabels[item.CODE] || item.NAME,
+                      })
+                    )}
                   />
                 </CustomFormItem>
               </CustomCol>

@@ -284,7 +284,6 @@ const RootTemplate: React.FC<React.PropsWithChildren> = ({ children }) => {
     return options?.map((option: MenuOption) => {
       return {
         key: option?.MENU_OPTION_ID,
-        title: option.NAME,
         type: option.TYPE,
         icon: <SVGReader svg={option.ICON} size={collapsed ? 22 : 20} />,
         onClick: option.CHILDREN?.length
@@ -293,7 +292,11 @@ const RootTemplate: React.FC<React.PropsWithChildren> = ({ children }) => {
         children: option?.CHILDREN?.length
           ? getSubMenu(option.CHILDREN)
           : undefined,
-        label: option.NAME,
+        label: (
+          <CustomTooltip placement={'right'} title={option.NAME}>
+            <span>{option.NAME}</span>
+          </CustomTooltip>
+        ),
       }
     }) as never
   }
