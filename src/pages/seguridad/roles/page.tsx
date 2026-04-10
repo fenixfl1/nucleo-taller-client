@@ -59,7 +59,7 @@ const SeguridadRolesPage: React.FC = () => {
 
       getRoles({ page, size, condition })
     },
-    [debounce, form, getRoles, metadata, rolesModalState]
+    [debounce, rolesModalState]
   )
 
   useEffect(handleSearch, [handleSearch])

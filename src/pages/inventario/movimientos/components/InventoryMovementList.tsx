@@ -33,6 +33,9 @@ const movementTypeLabels: Record<string, string> = {
 const formatDate = (value?: string | null) =>
   value ? dayjs(value).format('DD/MM/YYYY HH:mm') : 'N/A'
 
+const formatMovementNo = (value?: string | null) =>
+  `${value || ''}`.replace(/^MOV-/i, '')
+
 const InventoryMovementList: React.FC<InventoryMovementListProps> = ({
   onChange,
   onView,
@@ -40,7 +43,10 @@ const InventoryMovementList: React.FC<InventoryMovementListProps> = ({
   const { inventoryMovementList, metadata } = useInventoryMovementStore()
 
   const columnsMap: ColumnsMap<InventoryMovement> = {
-    MOVEMENT_NO: 'Movimiento',
+    MOVEMENT_NO: {
+      header: 'Movimiento',
+      render: (value) => formatMovementNo(String(value)),
+    },
     MOVEMENT_TYPE: {
       header: 'Tipo',
       render: (value) => movementTypeLabels[String(value)] || String(value),
@@ -70,7 +76,7 @@ const InventoryMovementList: React.FC<InventoryMovementListProps> = ({
       ]}
     >
       <CustomListItemMeta
-        title={<CustomText>{item.MOVEMENT_NO}</CustomText>}
+        title={<CustomText>{formatMovementNo(item.MOVEMENT_NO)}</CustomText>}
         description={
           <CustomSpace
             direction={'horizontal'}

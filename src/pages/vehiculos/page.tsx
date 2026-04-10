@@ -8,6 +8,8 @@ import { AdvancedCondition } from 'src/types/general'
 import CustomSpin from 'src/components/custom/CustomSpin'
 import CustomRow from 'src/components/custom/CustomRow'
 import CustomFormItem from 'src/components/custom/CustomFormItem'
+import CustomInput from 'src/components/custom/CustomInput'
+import CustomInputNumber from 'src/components/custom/CustomInputNumber'
 import CustomSelect from 'src/components/custom/CustomSelect'
 import { getConditionFromForm } from 'src/utils/get-condition-from-form'
 import { useErrorHandler } from 'src/hooks/use-error-handler'
@@ -103,6 +105,42 @@ const VehiclePage: React.FC = () => {
             { label: 'Activos', value: 'A' },
             { label: 'Inactivos', value: 'I' },
           ]}
+        />
+      </CustomFormItem>
+
+      <CustomFormItem
+        label={'Marca'}
+        name={['FILTER', 'BRAND__LIKE']}
+        labelCol={{ span: 24 }}
+      >
+        <CustomInput
+          style={{ minWidth: '15rem' }}
+          placeholder={'Filtrar por marca'}
+        />
+      </CustomFormItem>
+
+      <CustomFormItem
+        label={'Modelo'}
+        name={['FILTER', 'MODEL__LIKE']}
+        labelCol={{ span: 24 }}
+      >
+        <CustomInput
+          style={{ minWidth: '15rem' }}
+          placeholder={'Filtrar por modelo'}
+        />
+      </CustomFormItem>
+
+      <CustomFormItem
+        label={'Año'}
+        name={['FILTER', 'YEAR__EQ']}
+        labelCol={{ span: 24 }}
+      >
+        <CustomInputNumber
+          style={{ minWidth: '12rem' }}
+          min={1900}
+          max={2100}
+          precision={0}
+          placeholder={'Filtrar por año'}
         />
       </CustomFormItem>
     </CustomRow>

@@ -26,6 +26,9 @@ const formatDate = (value?: string | null) =>
 
 const formatNumber = (value?: number | null) => Number(value || 0).toFixed(2)
 
+const formatMovementNo = (value?: string | null) =>
+  `${value || ''}`.replace(/^MOV-/i, '')
+
 export const buildInventoryMovementPdf = async (
   movement: InventoryMovement
 ) => {
@@ -57,7 +60,7 @@ export const buildInventoryMovementPdf = async (
   addLine(business?.ADDRESS ? `Dirección: ${business.ADDRESS}` : undefined)
   addLine(business?.PHONE ? `Teléfono: ${business.PHONE}` : undefined)
 
-  doc.text(`Movimiento: ${movement.MOVEMENT_NO}`, pageWidth - 14, 28, {
+  doc.text(`Movimiento: ${formatMovementNo(movement.MOVEMENT_NO)}`, pageWidth - 14, 28, {
     align: 'right',
   })
   doc.text(`Fecha: ${formatDate(movement.MOVEMENT_DATE)}`, pageWidth - 14, 33, {
@@ -117,7 +120,9 @@ export const revokeInventoryMovementPdfObjectUrl = (url?: string | null) => {
 
 export const downloadInventoryMovementPdf = (movement: InventoryMovement) => {
   return buildInventoryMovementPdf(movement).then((doc) => {
-    doc.save(`movimiento_${movement.MOVEMENT_NO || movement.MOVEMENT_ID}.pdf`)
+    doc.save(
+      `movimiento_${formatMovementNo(movement.MOVEMENT_NO) || movement.MOVEMENT_ID}.pdf`
+    )
   })
 }
 

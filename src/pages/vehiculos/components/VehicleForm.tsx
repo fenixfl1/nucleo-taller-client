@@ -253,7 +253,6 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
                 <CustomFormItem label={'Año'} name={'YEAR'}>
                   <CustomInputNumber
                     style={{ width: '100%' }}
-                    format={{ format: 'default' }}
                     min={1900}
                     max={2100}
                     precision={0}

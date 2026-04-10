@@ -37,6 +37,9 @@ const movementTypeLabels: Record<string, string> = {
 const formatDate = (value?: string | null) =>
   value ? dayjs(value).format('DD/MM/YYYY HH:mm') : 'N/A'
 
+const formatMovementNo = (value?: string | null) =>
+  `${value || ''}`.replace(/^MOV-/i, '')
+
 const InventoryMovementDetailDrawer: React.FC<
   InventoryMovementDetailDrawerProps
 > = ({ movementId, open, onClose }) => {
@@ -51,7 +54,7 @@ const InventoryMovementDetailDrawer: React.FC<
     {
       key: 'movement-no',
       label: 'Movimiento',
-      children: movement?.MOVEMENT_NO,
+      children: formatMovementNo(movement?.MOVEMENT_NO),
     },
     {
       key: 'type',
