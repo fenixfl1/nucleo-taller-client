@@ -46,6 +46,6 @@ export function useGetWorkshopDashboardQuery() {
       return data?.data || EMPTY_DASHBOARD
     },
     staleTime: 60 * 1000,
-    initialData: EMPTY_DASHBOARD,
+    placeholderData: EMPTY_DASHBOARD,
   })
 }
